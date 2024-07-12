@@ -22,7 +22,8 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(0.0f, 19.0f, 3.0f));//摄像机对象
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));//创建摄像机对象
+
 float lastX = SCR_WIDTH / 2.0f;//鼠标初始位置
 float lastY = SCR_HEIGHT / 2.0f;//鼠标初始位置
 bool firstMouse = true;//第一次鼠标移动
