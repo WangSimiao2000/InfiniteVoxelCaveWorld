@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+#include "Chunk.cpp"
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
@@ -21,7 +22,7 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));//摄像机对象
+Camera camera(glm::vec3(0.0f, 19.0f, 3.0f));//摄像机对象
 float lastX = SCR_WIDTH / 2.0f;//鼠标初始位置
 float lastY = SCR_HEIGHT / 2.0f;//鼠标初始位置
 bool firstMouse = true;//第一次鼠标移动
@@ -74,6 +75,7 @@ int main()
 	Shader ourShader("VertexShader.vert", "FragmentShader.frag");//创建着色器对象
 
 	// ---- 设置顶点数据和索引数据 - START ---- //
+	// 单个体素的顶点数据
 	float vertices[] = {
 		// 顶点坐标          // 纹理坐标
 		// Front face
@@ -125,21 +127,12 @@ int main()
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 	};
 
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-	
-	// ---- 设置顶点数据和索引数据 - END ---- //
+	Chunk chunk(16, glm::vec3(0.0f, 0.0f, 0.0f));//创建区块对象
+	chunk.initializeChunk();//初始化区块, 使所有体素都被填充, 并记录它们的相对坐标
 
+	// 在渲染循环中
+	std::vector<glm::vec3> worldVoxelPositions = chunk.getVoxelWorldPositions();
+	// ---- 设置顶点数据和索引数据 - END ---- //
 
 	// ---- 绑定顶点数据到缓冲对象 - START ---- //
 	unsigned int VAO;//VAO对象是一个容器对象，存储了我们之后定义的顶点属性状态
@@ -230,10 +223,10 @@ int main()
 
 		glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
 		//float timeValue = glfwGetTime(); // 获取当前时间
-		for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < worldVoxelPositions.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);//模型矩阵
-			model = glm::translate(model, cubePositions[i]);
+			model = glm::translate(model, worldVoxelPositions[i]);
 			//float angle = 20.0f * i; // 每个立方体的初始角度
 			//float angle = 20.0f * i + timeValue * glm::radians(50.0f); // 每个立方体的初始角度 + 时间变化
 			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));//旋转
