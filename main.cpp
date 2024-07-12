@@ -8,10 +8,12 @@
 #include "Shader.h"
 #include "stb_image.h"
 #include "Camera.h"
+#include "Chunk.h"
+#include "ChunkManager.h"
 
 #include <iostream>
 #include <vector>
-#include "Chunk.cpp"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
@@ -22,7 +24,7 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));//创建摄像机对象
+Camera camera(glm::vec3(12.0f, 22.5f, 25.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
 
 float lastX = SCR_WIDTH / 2.0f;//鼠标初始位置
 float lastY = SCR_HEIGHT / 2.0f;//鼠标初始位置
@@ -130,7 +132,6 @@ int main()
 
 	Chunk chunk(16, glm::vec3(0.0f, 0.0f, 0.0f));//创建区块对象
 	chunk.initializeChunk();//初始化区块, 使所有体素都被填充, 并记录它们的相对坐标
-
 	// 在渲染循环中
 	std::vector<glm::vec3> worldVoxelPositions = chunk.getVoxelWorldPositions();
 	// ---- 设置顶点数据和索引数据 - END ---- //
@@ -201,10 +202,10 @@ int main()
 		float currentFrame = static_cast<float>(glfwGetTime());//获取当前时间
 		deltaTime = currentFrame - lastFrame;//计算时间差
 		lastFrame = currentFrame;//更新上一帧时间
-
+		
 		// input
 		processInput(window);
-
+		
 		// render
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //设置清空屏幕所用的颜色为深蓝色
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);//清空颜色缓冲
@@ -234,8 +235,8 @@ int main()
 			ourShader.setMat4("model", model);//设置模型矩阵
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);//参数分别为绘制模式, 起始索引, 绘制顶点个数
-		}
-
+		}	
+		
 		//glBindVertexArray(0);//解绑VAO对象(不是必须的)
 
 		// glfw: 交换缓冲区和轮询IO事件(键盘输入, 鼠标移动等)
