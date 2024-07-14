@@ -5,19 +5,19 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include "Chunk.h"
 
 class ChunkManager {
 public:
-    ChunkManager(int chunkSize) : chunkSize(chunkSize) {}
-
+    ChunkManager(int chunkSize);
     void update(const glm::vec3& cameraPosition);
-
     std::unordered_map<std::string, Chunk> chunks;
 
 private:
     int chunkSize;
+    glm::vec3 lastCameraPosition; // 上一帧的摄像机位置
 
     std::string getChunkKey(const glm::vec3& position);
     void loadChunk(const glm::vec3& position);

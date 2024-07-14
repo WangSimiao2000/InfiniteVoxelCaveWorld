@@ -13,14 +13,7 @@ Chunk::Chunk(int size, const glm::vec3& position)
 
 // 默认构造函数，初始化区块大小为16，位置为原点
 Chunk::Chunk()
-    : size(16), position(glm::vec3(0.0f))
-{
-    chunkBlocks = std::vector<std::vector<std::vector<bool>>>(size,
-        std::vector<std::vector<bool>>(size,
-            std::vector<bool>(size, false)));
-    gradients = std::array<glm::vec3, 8>{};
-    voxelPositions.reserve(size * size * size);
-}
+    :   Chunk(16, glm::vec3(0.0f)) {}
 
 // 初始化区块，使所有体素都被填充，并记录它们的相对坐标
 void Chunk::initializeChunk() {
