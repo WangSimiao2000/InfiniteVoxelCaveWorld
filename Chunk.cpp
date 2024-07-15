@@ -8,7 +8,7 @@ Chunk::Chunk(int size, const glm::vec3& position)
         std::vector<std::vector<bool>>(size,
             std::vector<bool>(size, false)));
     gradients = std::array<glm::vec3, 8>{};
-    voxelPositions.reserve(size * size * size);
+	voxelPositions.reserve(size * size * size);
 }
 
 // 默认构造函数，初始化区块大小为16，位置为原点

@@ -20,8 +20,8 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);//鼠标回调函数
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);//滚轮回调函数
 
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
 
 // camera
 Camera camera(glm::vec3(0.0f, 22.5f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
@@ -49,7 +49,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);//macOS系统需要设置
 #endif
 
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);//创建窗口
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "InfiniteVoxelWorld", NULL, NULL);//创建窗口
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -131,11 +131,6 @@ int main()
 		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 	};
 
-	//Chunk chunk(16, glm::vec3(0.0f, 0.0f, 0.0f));//创建区块对象
-	//chunk.initializeChunk();//初始化区块, 使所有体素都被填充, 并记录它们的相对坐标
-
-	// 在渲染循环中
-	//std::vector<glm::vec3> worldVoxelPositions = chunk.getVoxelWorldPositions();	 
 	// ---- 设置顶点数据和索引数据 - END ---- //
 
 	// ---- 绑定顶点数据到缓冲对象 - START ---- //
@@ -210,9 +205,6 @@ int main()
 		glm::vec3 cameraPosition = camera.Position;
 		// 更新区块管理器
 		chunkManager.update(cameraPosition);
-		// 打印摄像机所在的区块位置
-		// std::cout << "Camera position: " << cameraPosition.x << ", " << cameraPosition.y << ", " << cameraPosition.z << std::endl;
-
 
 		// input
 		processInput(window);
@@ -236,22 +228,7 @@ int main()
 
 		glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
 		//float timeValue = glfwGetTime(); // 获取当前时间
-
-		/*
-		for (unsigned int i = 0; i < worldVoxelPositions.size(); i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);//模型矩阵
-			model = glm::translate(model, worldVoxelPositions[i]);
-			//float angle = 20.0f * i; // 每个立方体的初始角度
-			//float angle = 20.0f * i + timeValue * glm::radians(50.0f); // 每个立方体的初始角度 + 时间变化
-			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));//旋转
-			ourShader.setMat4("model", model);//设置模型矩阵
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);//参数分别为绘制模式, 起始索引, 绘制顶点个数
-		}
-		*/
-
-		///*
+				
 		// 渲染当前加载的区块
 		for (const auto& chunkPair : chunkManager.chunks) {
 			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
@@ -268,8 +245,7 @@ int main()
 				glDrawArrays(GL_TRIANGLES, 0, 36); // 参数分别为绘制模式, 起始索引, 绘制顶点个数
 			}
 		}
-		//*/
-		
+				
 		//glBindVertexArray(0);//解绑VAO对象(不是必须的)
 
 		// glfw: 交换缓冲区和轮询IO事件(键盘输入, 鼠标移动等)

@@ -21,9 +21,7 @@ private:
 
     std::string getChunkKey(const glm::vec3& position);
     void loadChunk(const glm::vec3& position);
-    void unloadChunk(const std::string& key);
     void saveChunkToFile(const Chunk& chunk, const std::string& filename);
-    Chunk loadChunkFromFile(const std::string& filename);
 };
 
 #endif // CHUNK_MANAGER_H

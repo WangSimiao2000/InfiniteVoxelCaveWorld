@@ -53,6 +53,7 @@ std::string ChunkManager::getChunkKey(const glm::vec3& position) {
 // 更新当前加载的区块
 void ChunkManager::update(const glm::vec3& cameraPosition) {
 	std::unordered_map<std::string, Chunk> tempChunks;// 临时存储新加载的区块
+	tempChunks.clear();
 
 	// 计算摄像机所在的区块位置
     glm::vec3 cameraChunkPosition = glm::vec3(
@@ -93,17 +94,7 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
             tempChunks[key] = chunks[key];
         }
     }
-
-    // 打印当前已有的区块数量
-    std::cout << "Number of chunks: " << chunks.size() << std::endl;
-
-    // 卸载不再需要的区块（不在新加载的区块范围内）
-    for (const auto& chunk : chunks) {
-        if (tempChunks.find(chunk.first) == tempChunks.end()) {
-			std::cout << "Unloading chunk: " << chunk.first << std::endl;
-            unloadChunk(chunk.first);
-        }
-    }
+    
     // 更新chunks成员变量
     chunks = tempChunks;
 }
@@ -114,65 +105,47 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
     std::string key = getChunkKey(position);
 	// 生成区块文件名
     std::string filename = "chunks/" + key + ".chunk";
-    // 从文件加载区块
-    Chunk chunk = loadChunkFromFile(filename);
 
-    // 如果文件不存在或读取失败，则初始化一个新的区块
-    // 如果从文件加载的区块为空，则初始化一个新的区块
-    if (chunk.getVoxelWorldPositions().empty()) {
-        std::cout << "Creating new chunk at position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
-        chunk = Chunk(chunkSize, position);
-        chunk.initializeChunk();
+    Chunk chunk(chunkSize, position); // 创建空的Chunk对象
+
+    std::ifstream inFile(filename, std::ios::binary);// ifstream对象用于读取文件, 以二进制格式打开文件
+    if (inFile.is_open()) {
+        // 读取区块数据
+        glm::vec3 pos;
+        while (inFile.read(reinterpret_cast<char*>(&pos), sizeof(glm::vec3))) {
+            chunk.addVoxel(pos);
+        }
+
+        inFile.close();
+        std::cout << "Loaded chunk from file: " << filename << std::endl;
     }
+    else {
+        std::cerr << "Failed to load chunk from file: " << filename << std::endl;
+        std::cout << "Creating new chunk at position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
+        chunk.initializeChunk();
+        saveChunkToFile(chunk, filename);
+    }
+
 
     // 将加载的区块存储到chunks中
     chunks[key] = chunk;
 }
 
-// 卸载区块
-void ChunkManager::unloadChunk(const std::string& key) {
-    std::string filename = "chunks/" + key + ".chunk";
-	std::cout << "Unloading chunk: " << filename << std::endl;
-    // 将区块保存到文件
-    saveChunkToFile(chunks[key], filename);
-	// 从chunks中移除区块
-	// 这里不需要从chunks中移除区块，因为在update函数中已经更新了chunks成员变量, 会覆盖掉之前的区块
-    // chunks.erase(key);
-}
-
 // 将区块数据保存到文件
 void ChunkManager::saveChunkToFile(const Chunk& chunk, const std::string& filename) {
-    //使用二进制格式保存区块中的体素位置
+    // 使用二进制格式保存区块中的体素位置
     std::ofstream outFile(filename, std::ios::binary);
+    
     if (outFile.is_open()) {
         // 保存区块数据
         // 遍历区块中的每个体素位置，并写入文件
-        for (const auto& pos : chunk.getVoxelWorldPositions()) {
+        for (const auto& pos : chunk.getVoxelPositions()) {
             outFile.write(reinterpret_cast<const char*>(&pos), sizeof(glm::vec3));
         }
         outFile.close();
+        std::cerr << "Saved chunk to file: " << filename << std::endl;
     }
     else {
         std::cerr << "Failed to save chunk to file: " << filename << std::endl;
     }
-}
-
-// 从文件加载区块数据
-Chunk ChunkManager::loadChunkFromFile(const std::string& filename) {
-    Chunk chunk(chunkSize, glm::vec3(0.0f)); // 创建空的Chunk对象
-
-	std::ifstream inFile(filename, std::ios::binary);// ifstream对象用于读取文件, 以二进制格式打开文件
-    if (inFile.is_open()) {
-        // 读取区块数据
-        glm::vec3 pos;
-        while (inFile.read(reinterpret_cast<char*>(&pos), sizeof(glm::vec3))) {
-			chunk.addVoxel(pos);
-        }
-        inFile.close();
-		std::cout << "Loaded chunk from file: " << filename << std::endl;
-    }
-    else {
-        std::cerr << "Failed to load chunk from file: " << filename << std::endl;
-    }
-    return chunk;
 }

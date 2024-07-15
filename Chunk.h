@@ -19,10 +19,11 @@ public:
 
 private:
     int size;
+    std::vector<glm::vec3> voxelPositions;
     glm::vec3 position;
     std::vector<std::vector<std::vector<bool>>> chunkBlocks;
-    std::vector<glm::vec3> voxelPositions;
     std::array<glm::vec3, 8> gradients;
+
 };
 
 #endif // CHUNK_H
