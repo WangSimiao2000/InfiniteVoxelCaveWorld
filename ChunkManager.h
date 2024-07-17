@@ -18,6 +18,7 @@ public:
 private:
     int chunkSize;
     glm::vec3 lastCameraPosition; // 上一帧的摄像机位置
+    FastNoiseLite noise; // FastNoiseLite 对象
 
     std::string getChunkKey(const glm::vec3& position);
     void loadChunk(const glm::vec3& position);

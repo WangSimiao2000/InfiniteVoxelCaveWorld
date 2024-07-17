@@ -13,6 +13,11 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
         std::filesystem::create_directory("chunks");
     }
 
+    // 配置噪声生成器
+    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    noise.SetFrequency(0.1f); // 设置噪声频率
+	noise.SetSeed(1234); // 设置噪声种子
+
     // 临时存储新加载的区块
 	std::unordered_map<std::string, Chunk> tempChunks;
 
@@ -122,7 +127,7 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
     else {
         std::cerr << "Failed to load chunk from file: " << filename << std::endl;
         std::cout << "Creating new chunk at position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
-        chunk.initializeChunk();
+        chunk.initializeChunk(noise);
         saveChunkToFile(chunk, filename);
     }
 
