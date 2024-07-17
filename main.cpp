@@ -37,6 +37,8 @@ float lastFrame = 0.0f;// 上一帧的时间
 
 // 全局变量用于记录当前的绘图模式
 bool isWireframe = false;
+bool mouseRightPressed = false;
+bool cameraControlEnabled = true;
 
 int main()
 {
@@ -243,15 +245,12 @@ int main()
 			for (unsigned int i = 0; i < worldVoxelPositions.size(); i++) {
 				glm::mat4 model = glm::mat4(1.0f); // 模型矩阵
 				model = glm::translate(model, worldVoxelPositions[i]);
-				// float angle = 20.0f * i; // 每个立方体的初始角度
-				// float angle = 20.0f * i + timeValue * glm::radians(50.0f); // 每个立方体的初始角度 + 时间变化
-				// model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f)); // 旋转
 				ourShader.setMat4("model", model); // 设置模型矩阵
 
 				glDrawArrays(GL_TRIANGLES, 0, 36); // 参数分别为绘制模式, 起始索引, 绘制顶点个数
-			}
+			}			
 		}
-				
+
 		//glBindVertexArray(0);//解绑VAO对象(不是必须的)
 
 		// glfw: 交换缓冲区和轮询IO事件(键盘输入, 鼠标移动等)
@@ -271,11 +270,13 @@ int main()
 // 处理输入
 void processInput(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)//按下ESC键
+	//按下ESC键关闭窗口
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
 
+	// 前后左右移动
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -292,6 +293,40 @@ void processInput(GLFWwindow* window)
 	{
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 
+	}
+
+	// 上下移动
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		camera.ProcessKeyboard(DOWN, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		camera.ProcessKeyboard(UP, deltaTime);
+
+	}
+
+	// 按下右键切换相机控制
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+	{
+		if (!mouseRightPressed)
+		{
+			mouseRightPressed = true;
+			cameraControlEnabled = !cameraControlEnabled;
+			if (cameraControlEnabled)
+			{
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			}
+			else
+			{
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				firstMouse = true;
+			}
+		}
+	}
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
+	{
+		mouseRightPressed = false;
 	}
 
 	// 按下空格键切换绘图模式
@@ -324,23 +359,25 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // 鼠标回调函数: 鼠标移动时调用
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	float xpos = static_cast<float>(xposIn);
-	float ypos = static_cast<float>(yposIn);
+	if (cameraControlEnabled) {
+		float xpos = static_cast<float>(xposIn);
+		float ypos = static_cast<float>(yposIn);
 
-	if (firstMouse)
-	{
+		if (firstMouse)
+		{
+			lastX = xpos;
+			lastY = ypos;
+			firstMouse = false;
+		}
+
+		float xoffset = xpos - lastX;
+		float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
 		lastX = xpos;
 		lastY = ypos;
-		firstMouse = false;
+
+		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-	lastX = xpos;
-	lastY = ypos;
-
-	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 

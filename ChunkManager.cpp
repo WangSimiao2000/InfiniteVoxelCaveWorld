@@ -15,7 +15,7 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
     // 配置噪声生成器
     noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    noise.SetFrequency(0.1f); // 设置噪声频率
+	noise.SetFrequency(0.1f); // 设置噪声频率
 	noise.SetSeed(1234); // 设置噪声种子
 
     // 临时存储新加载的区块
@@ -153,4 +153,38 @@ void ChunkManager::saveChunkToFile(const Chunk& chunk, const std::string& filena
     else {
         std::cerr << "Failed to save chunk to file: " << filename << std::endl;
     }
+}
+
+bool ChunkManager::isVoxelAt(const glm::vec3& worldPosition) {
+	// 第一步: 计算体素所在的区块的世界坐标
+    glm::vec3 chunkPosition = glm::vec3(
+        floor(worldPosition.x / chunkSize) * chunkSize,
+        floor(worldPosition.y / chunkSize) * chunkSize,
+        floor(worldPosition.z / chunkSize) * chunkSize
+    );
+
+	// 第二步: 生成区块的键
+    std::string key = getChunkKey(chunkPosition);
+
+	// 第三步: 检查区块是否已加载
+    if (chunks.find(key) != chunks.end()) {
+        const Chunk& chunk = chunks.at(key);
+
+		// 第四步: 计算体素在区块中的局部坐标
+        glm::vec3 localPosition = worldPosition - chunkPosition;
+
+		// 第五步: 检查体素是否存在
+        int x = static_cast<int>(localPosition.x);
+        int y = static_cast<int>(localPosition.y);
+        int z = static_cast<int>(localPosition.z);
+
+		// 检查体素是否在区块范围内
+        if (x >= 0 && x < chunkSize && y >= 0 && y < chunkSize && z >= 0 && z < chunkSize) {
+            // Step 5: Check if the voxel exists
+            return chunk.getChunkBlocks()[x][y][z];
+        }
+    }
+
+	// 如果体素不在区块中，则返回false
+    return false;
 }
