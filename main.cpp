@@ -25,6 +25,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 // camera
 Camera camera(glm::vec3(0.0f, 22.5f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
+
 //Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));//创建摄像机对象, 参数分别为摄像机的位置
 
 float lastX = SCR_WIDTH / 2.0f;//鼠标初始位置
@@ -298,12 +299,11 @@ void processInput(GLFWwindow* window)
 	// 上下移动
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
-		camera.ProcessKeyboard(DOWN, deltaTime);
+		camera.Position.y -= camera.MovementSpeed * deltaTime;
 	}
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
-		camera.ProcessKeyboard(UP, deltaTime);
-
+		camera.Position.y += camera.MovementSpeed * deltaTime;
 	}
 
 	// 按下右键切换相机控制
