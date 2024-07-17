@@ -7,7 +7,6 @@ Chunk::Chunk(int size, const glm::vec3& position)
     chunkBlocks = std::vector<std::vector<std::vector<bool>>>(size,
         std::vector<std::vector<bool>>(size,
             std::vector<bool>(size, false)));
-    gradients = std::array<glm::vec3, 8>{};
 	voxelPositions.reserve(size * size * size);
 }
 
@@ -15,7 +14,7 @@ Chunk::Chunk(int size, const glm::vec3& position)
 Chunk::Chunk()
     :   Chunk(16, glm::vec3(0.0f)) {}
 
-// 初始化区块，使所有体素都被填充，并记录它们的相对坐标
+// 初始化区块
 void Chunk::initializeChunk() {
     voxelPositions.clear();
     for (int x = 0; x < size; ++x) {
@@ -25,13 +24,6 @@ void Chunk::initializeChunk() {
                 voxelPositions.push_back(glm::vec3(x, y, z));
             }
         }
-    }
-}
-
-// 设置区块某个顶点的梯度向量
-void Chunk::setGradient(int index, const glm::vec3& gradient) {
-    if (index >= 0 && index < 8) {
-        gradients[index] = gradient;
     }
 }
 

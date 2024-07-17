@@ -11,7 +11,6 @@ public:
     Chunk();
 
     void initializeChunk();
-    void setGradient(int index, const glm::vec3& gradient);
     std::vector<glm::vec3> getVoxelWorldPositions() const;
     void addVoxel(const glm::vec3& pos);
     const std::vector<std::vector<std::vector<bool>>>& getChunkBlocks() const;
@@ -22,8 +21,6 @@ private:
     std::vector<glm::vec3> voxelPositions;
     glm::vec3 position;
     std::vector<std::vector<std::vector<bool>>> chunkBlocks;
-    std::array<glm::vec3, 8> gradients;
-
 };
 
 #endif // CHUNK_H

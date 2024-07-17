@@ -188,7 +188,11 @@ int main()
 	}
 	stbi_image_free(data);//释放图像内存
 
+	glm::vec3 lightDirection = glm::vec3(0.35f, 0.6f, 0.45f);
+	lightDirection = glm::normalize(lightDirection);
+
 	ourShader.use();//使用着色器程序
+	ourShader.setVec3("lightDir", lightDirection);//设置光照方向
 	ourShader.setInt("ourTexture", 0);//设置纹理单元, 这里的ourTexture对应的是着色器里声明的uniform sampler2D ourTexture, 0表示使用纹理单元GL_TEXTURE0, 当只有一个纹理单元时, 引号内的ourTexture不会影响结果, 但是如果有多个纹理单元时, 这个名字就很重要了
 	//glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);//和上面一行代码功能一样, 设置纹理单元, 上面一行代码是通过着色器类的函数设置, 这行代码是直接通过glUniform1i函数设置, 这里注释掉, 仅供参考
 	// ---- 加载和创建纹理 - END ---- //
@@ -218,6 +222,8 @@ int main()
 		//glBindTexture(GL_TEXTURE_2D, texture);//绑定纹理对象
 
 		ourShader.use();//使用着色器程序
+
+		ourShader.setVec3("viewPos", cameraPosition); // 将相机位置传递给着色器
 
 		// 相机/观察矩阵
 		glm::mat4 view = camera.GetViewMatrix();//获取观察矩阵
