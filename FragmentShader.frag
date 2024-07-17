@@ -12,7 +12,7 @@ uniform vec3 viewPos; // 视点位置
 void main()
 {
 	// 定义光照颜色
-    float ambientStrength = 0.2; // 环境光强度
+    float ambientStrength = 0.6; // 环境光强度
     float specularStrength = 0.1; // 镜面反射强度
     float shininess = 32.0; // 高光系数
     vec3 lightColor = vec3(1.0, 0.95, 0.9);

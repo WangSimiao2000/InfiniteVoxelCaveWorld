@@ -30,6 +30,7 @@ void Chunk::initializeChunk(FastNoiseLite& noise) {
             }
         }
     }
+    generateVisibleFaces();
 }
 
 // 获取体素的世界坐标(世界坐标 = 区块坐标 + 体素坐标)
@@ -39,6 +40,33 @@ std::vector<glm::vec3> Chunk::getVoxelWorldPositions() const {
         worldPositions.push_back(pos + position);
     }
     return worldPositions;
+}
+
+// 将可见面添加到visibleFaces数组中
+void Chunk::generateVisibleFaces() {
+    visibleFaces.clear();
+    for (int x = 0; x < size; ++x) {
+        for (int y = 0; y < size; ++y) {
+            for (int z = 0; z < size; ++z) {
+                if (chunkBlocks[x][y][z]) {
+                    if (!isVoxelAt(x + 1, y, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::RIGHT_FACE);
+                    if (!isVoxelAt(x - 1, y, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::LEFT_FACE);
+                    if (!isVoxelAt(x, y + 1, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::TOP_FACE);
+                    if (!isVoxelAt(x, y - 1, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::BOTTOM_FACE);
+                    if (!isVoxelAt(x, y, z + 1)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::FRONT_FACE);
+                    if (!isVoxelAt(x, y, z - 1)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::BACK_FACE);
+                }
+            }
+        }
+    }
+}
+
+// 判断坐标(x, y, z)处是否有体素
+bool Chunk::isVoxelAt(int x, int y, int z) const {
+    if (x >= 0 && x < size && y >= 0 && y < size && z >= 0 && z < size) {
+        return chunkBlocks[x][y][z];
+    }
+    return false;
 }
 
 // 添加体素到区块中,当体素的坐标在区块范围内时，将体素的坐标添加到voxelPositions数组中, 用于后续渲染
@@ -61,4 +89,9 @@ const std::vector<std::vector<std::vector<bool>>>& Chunk::getChunkBlocks() const
 // 获取voxelPositions: 体素的相对坐标的数组
 const std::vector<glm::vec3>& Chunk::getVoxelPositions() const {
     return voxelPositions;
+}
+
+// 获取区块中的可见面
+std::vector<std::pair<glm::vec3, Face>> Chunk::getVisibleFaces() const {
+    return visibleFaces;
 }

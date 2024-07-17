@@ -241,15 +241,45 @@ int main()
 		// 渲染当前加载的区块
 		for (const auto& chunkPair : chunkManager.chunks) {
 			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
-			std::vector<glm::vec3> worldVoxelPositions = chunk.getVoxelWorldPositions();
+			
+			// 通过体素世界坐标渲染体素
+			//std::vector<glm::vec3> worldVoxelPositions = chunk.getVoxelWorldPositions();
+			//for (unsigned int i = 0; i < worldVoxelPositions.size(); i++) {
+			//	glm::mat4 model = glm::mat4(1.0f); // 模型矩阵
+			//	model = glm::translate(model, worldVoxelPositions[i]);
+			//	ourShader.setMat4("model", model); // 设置模型矩阵
 
-			for (unsigned int i = 0; i < worldVoxelPositions.size(); i++) {
-				glm::mat4 model = glm::mat4(1.0f); // 模型矩阵
-				model = glm::translate(model, worldVoxelPositions[i]);
-				ourShader.setMat4("model", model); // 设置模型矩阵
+			//	glDrawArrays(GL_TRIANGLES, 0, 36); // 参数分别为绘制模式, 起始索引, 绘制顶点个数
+			//}
 
-				glDrawArrays(GL_TRIANGLES, 0, 36); // 参数分别为绘制模式, 起始索引, 绘制顶点个数
-			}			
+			// 通过可见面渲染体素
+			std::vector<std::pair<glm::vec3, Face>> visibleFaces = chunk.getVisibleFaces();
+			for (const auto& face : visibleFaces) {
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, face.first);//face.first是体素的位置
+				ourShader.setMat4("model", model);
+
+				switch (face.second) {
+				case Face::FRONT_FACE:
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					break;
+				case Face::BACK_FACE:
+					glDrawArrays(GL_TRIANGLES, 6, 6);
+					break;
+				case Face::TOP_FACE:
+					glDrawArrays(GL_TRIANGLES, 12, 6);
+					break;
+				case Face::BOTTOM_FACE:
+					glDrawArrays(GL_TRIANGLES, 18, 6);
+					break;
+				case Face::RIGHT_FACE:
+					glDrawArrays(GL_TRIANGLES, 24, 6);
+					break;
+				case Face::LEFT_FACE:
+					glDrawArrays(GL_TRIANGLES, 30, 6);
+					break;
+				}
+			}
 		}
 
 		//glBindVertexArray(0);//解绑VAO对象(不是必须的)

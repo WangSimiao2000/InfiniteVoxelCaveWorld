@@ -14,7 +14,6 @@ public:
     ChunkManager(int chunkSize);
     void update(const glm::vec3& cameraPosition);
     std::unordered_map<std::string, Chunk> chunks;
-    bool isVoxelAt(const glm::vec3& worldPosition);
 
 private:
     int chunkSize;
