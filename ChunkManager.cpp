@@ -67,6 +67,16 @@ void ChunkManager::setNoiseWeights(float weight1, float weight2) {
     this->weight2 = weight2;
 }
 
+bool ChunkManager::getIsLoading() const
+{
+    return isLoading;
+}
+
+std::unordered_map<std::string, Chunk>& ChunkManager::getChunks()
+{
+	return chunks;
+}
+
 // 更新当前加载的区块
 void ChunkManager::update(const glm::vec3& cameraPosition) {
 

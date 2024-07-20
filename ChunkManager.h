@@ -13,14 +13,12 @@ class ChunkManager {
 public:
     ChunkManager(int chunkSize);
     void update(const glm::vec3& cameraPosition);
-    std::unordered_map<std::string, Chunk> chunks; 
     void clearChunks();// 清空已加载的区块
     void stopLoading();// 停止加载区块（可用于暂停区块的加载）
-	void startLoading();// 开始加载区块（可用于恢复区块的加载）
-    bool isLoading = true; // 标志是否正在加载区块
-    // 设置噪声类型和权重
-    void setNoiseWeights(float weight1, float weight2);
-
+	void startLoading();// 开始加载区块（可用于恢复区块的加载）    
+    void setNoiseWeights(float weight1, float weight2);// 设置噪声权重
+	bool getIsLoading() const;
+	std::unordered_map<std::string, Chunk>& getChunks();
 
 private:
     int chunkSize;
@@ -31,6 +29,8 @@ private:
     float weight2 = 0.0f; // 第二种噪声的权重
 	float THRESHOLD = 0.3f; // 阈值
 	int SEED = 1234; // 随机种子
+    bool isLoading = true; // 标志是否正在加载区块
+    std::unordered_map<std::string, Chunk> chunks;
 
     std::string getChunkKey(const glm::vec3& position);
     void loadChunk(const glm::vec3& position);

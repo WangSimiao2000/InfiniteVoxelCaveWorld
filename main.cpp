@@ -259,7 +259,7 @@ int main()
 				camera.Position = glm::vec3(0.0f, 22.5f, 0.0f);
 			}
 			// 停止加载按钮
-			if (chunkManager.isLoading)
+			if (chunkManager.getIsLoading())
 			{
 				if (ImGui::Button("Stop Loading Chunks")) {
 					chunkManager.stopLoading();
@@ -329,7 +329,7 @@ int main()
 		//float timeValue = glfwGetTime(); // 获取当前时间
 				
 		// 渲染当前加载的区块
-		for (const auto& chunkPair : chunkManager.chunks) {
+		for (const auto& chunkPair : chunkManager.getChunks()) {
 			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
 			
 			// 通过体素世界坐标渲染体素
