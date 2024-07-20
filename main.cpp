@@ -11,6 +11,10 @@
 #include "Chunk.h"
 #include "ChunkManager.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 #include <iostream>
 #include <vector>
 
@@ -20,8 +24,8 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);//鼠标回调函数
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);//滚轮回调函数
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1200;
+const unsigned int SCR_HEIGHT = 750;
 
 // camera
 Camera camera(glm::vec3(0.0f, 22.5f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
@@ -40,6 +44,8 @@ float lastFrame = 0.0f;// 上一帧的时间
 bool isWireframe = false;
 bool mouseRightPressed = false;
 bool cameraControlEnabled = true;
+
+int chunkSize = 16;//区块大小s
 
 int main()
 {
@@ -80,6 +86,14 @@ int main()
 	glEnable(GL_CULL_FACE);
 
 	Shader ourShader("VertexShader.vert", "FragmentShader.frag");//创建着色器对象
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+
+	// 设置平台/渲染器绑定
+	ImGui_ImplGlfw_InitForOpenGL(window, true);          // 第二个参数是是否捕捉鼠标, 这里的YOUR_WINDOW是你的GLFW窗口,应该改成你的窗口变量名
+	ImGui_ImplOpenGL3_Init();
 
 	// ---- 设置顶点数据和索引数据 - START ---- //
 	// 单个体素的顶点数据
@@ -172,18 +186,18 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//设置S轴的环绕方式为GL_REPEAT
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//设置T轴的环绕方式为GL_REPEAT
 	// 设置纹理过滤方式
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);//设置缩小过滤方式为GL_LINEAR
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//设置放大过滤方式为GL_LINEAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//设置缩小过滤方式为GL_LINEAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//设置放大过滤方式为GL_LINEAR
 
 	// 加载纹理图片, 创建纹理, 生成Mipmap
 	int width, height, nrChannels;//图片宽度, 高度, 颜色通道数,这里的width, height, nrChannels是通过stbi_load函数返回的
 	stbi_set_flip_vertically_on_load(true);//翻转图片y轴, 因为OpenGL的坐标原点在窗口左下角, 而图片的坐标原点在左上角
 	//unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);//加载箱子纹理图片
-	unsigned char* data = stbi_load("stone.png", &width, &height, &nrChannels, 0);//加载minecraft石头纹理图片
+	unsigned char* data = stbi_load("stone_16.png", &width, &height, &nrChannels, 0);//加载minecraft石头纹理图片
 	if (data)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);//生成纹理, 参数分别为纹理目标, mipmap级别, 纹理存储格式, 宽, 高, 0, 源图格式, 源图数据类型, 图像数据
-		glGenerateMipmap(GL_TEXTURE_2D);//生成Mipmap
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);//生成纹理, 参数分别为纹理目标, mipmap级别, 纹理存储格式, 宽, 高, 0, 源图格式, 源图数据类型, 图像数据
+		//glGenerateMipmap(GL_TEXTURE_2D);//生成Mipmap
 	}
 	else
 	{
@@ -191,7 +205,8 @@ int main()
 	}
 	stbi_image_free(data);//释放图像内存
 
-	glm::vec3 lightDirection = glm::vec3(0.35f, 0.6f, 0.45f);
+	// 设置光照方向
+	glm::vec3 lightDirection = glm::vec3(0.35f, 0.6f, 0.10f);
 	lightDirection = glm::normalize(lightDirection);
 
 	ourShader.use();//使用着色器程序
@@ -200,13 +215,88 @@ int main()
 	//glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);//和上面一行代码功能一样, 设置纹理单元, 上面一行代码是通过着色器类的函数设置, 这行代码是直接通过glUniform1i函数设置, 这里注释掉, 仅供参考
 	// ---- 加载和创建纹理 - END ---- //
 
-	ChunkManager chunkManager(16);//创建区块管理器对象
+	ChunkManager chunkManager(chunkSize);//创建区块管理器对象	
 
 	while (!glfwWindowShouldClose(window))//循环渲染
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());//获取当前时间
 		deltaTime = currentFrame - lastFrame;//计算时间差
+		float fps = 1.0f / deltaTime;//计算帧率
 		lastFrame = currentFrame;//更新上一帧时间
+
+		// 开始ImGui帧
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		// 根据需要启用或禁用Dear ImGui对鼠标的绑定
+		if (cameraControlEnabled) {
+			io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // 设置标志，禁用鼠标
+		}
+		else {
+			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // 清除标志，启用鼠标
+		}
+
+		ImGui::SetNextWindowPos(ImVec2(5, 5));// 设置窗口位置
+		ImGui::SetNextWindowSize(ImVec2(435, 200));
+		ImGui::Begin("InfiniteVoxelWorld",nullptr, ImGuiWindowFlags_NoResize);// 创建窗口并显示信息
+
+		// 禁用
+		
+		{
+			ImGui::Text("FPS: %.1f", fps);//显示帧率
+			ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//显示相机位置		
+			ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//显示相机所在区块位置
+		}
+
+		ImGui::Separator(); // 添加分隔线
+
+		{
+			ImGui::BeginChild("Chunk Manage", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
+			// 重置按钮
+			if (ImGui::Button("Reset Chunks and Camera")) {
+				chunkManager.clearChunks();
+				camera.Position = glm::vec3(0.0f, 22.5f, 0.0f);
+			}
+			// 停止加载按钮
+			if (chunkManager.isLoading)
+			{
+				if (ImGui::Button("Stop Loading Chunks")) {
+					chunkManager.stopLoading();
+				}
+			}
+			else
+			{
+				if (ImGui::Button("Start Loading Chunks")) {
+					chunkManager.startLoading();
+				}
+			}
+			ImGui::EndChild(); 
+		}		
+
+		ImGui::SameLine(); // 在同一行继续绘制
+
+		{
+			ImGui::BeginChild("Noise Weight Settings", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
+			static float weight1 = 1.0f;
+			float weight2 = 1.0f - weight1;
+
+			// 修改噪声权重
+			ImGui::SliderFloat("##", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
+			ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
+			ImGui::Text("Perlin Weight: %.2f", weight2); // 显示自动计算的 weight2
+			// 应用噪声设置
+			if (ImGui::Button("Apply Weight")) {
+				chunkManager.setNoiseWeights(weight1, weight2);
+			}
+			ImGui::EndChild();
+		}
+
+		// 打印当前imgui窗口的大小
+		//ImVec2 windowSize = ImGui::GetWindowSize();
+		//ImGui::Text("Window Size: (%.0f, %.0f)", windowSize.x, windowSize.y);
+
+		ImGui::End();
 		
 		// 更新相机位置
 		glm::vec3 cameraPosition = camera.Position;
@@ -282,6 +372,10 @@ int main()
 			}
 		}
 
+		// 渲染GUI
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		//glBindVertexArray(0);//解绑VAO对象(不是必须的)
 
 		// glfw: 交换缓冲区和轮询IO事件(键盘输入, 鼠标移动等)
@@ -292,6 +386,11 @@ int main()
 	// 可选: 释放所有资源
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+
+	// 渲染结束后清理ImGui
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	// 清理所有之前分配的GLFW资源
 	glfwTerminate();

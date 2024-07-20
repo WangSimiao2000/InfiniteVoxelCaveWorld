@@ -14,9 +14,16 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
     }
 
     // 配置噪声生成器
-    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	noise.SetFrequency(0.1f); // 设置噪声频率
-	noise.SetSeed(1234); // 设置噪声种子
+    // 初始化噪声生成器
+    noise1.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise1.SetFrequency(0.1f);
+    noise1.SetSeed(SEED);
+
+    noise2.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    noise2.SetFrequency(0.1f);
+    noise2.SetSeed(SEED);
+
+	THRESHOLD = 0.3f; // 阈值
 
     // 临时存储新加载的区块
 	std::unordered_map<std::string, Chunk> tempChunks;
@@ -55,8 +62,18 @@ std::string ChunkManager::getChunkKey(const glm::vec3& position) {
     return std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z);
 }
 
+void ChunkManager::setNoiseWeights(float weight1, float weight2) {
+    this->weight1 = weight1;
+    this->weight2 = weight2;
+}
+
 // 更新当前加载的区块
 void ChunkManager::update(const glm::vec3& cameraPosition) {
+
+    if (!isLoading) {
+        return; // 如果停止加载，则不进行更新
+    }
+
 	std::unordered_map<std::string, Chunk> tempChunks;// 临时存储新加载的区块
 	tempChunks.clear();
 
@@ -104,6 +121,24 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     chunks = tempChunks;
 }
 
+void ChunkManager::clearChunks()
+{
+    chunks.clear(); // 清空已加载的区块
+    std::cout << "Cleared all loaded chunks." << std::endl;
+}
+
+void ChunkManager::stopLoading()
+{
+    isLoading = false; // 停止加载区块
+    std::cout << "Stopped loading chunks." << std::endl;
+}
+
+void ChunkManager::startLoading()
+{
+	isLoading = true; // 开始加载区块
+	std::cout << "Started loading chunks." << std::endl;
+}
+
 // 加载区块
 void ChunkManager::loadChunk(const glm::vec3& position) {
 	// 根据区块的位置生成唯一的键
@@ -127,7 +162,7 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
     else {
         std::cerr << "Failed to load chunk from file: " << filename << std::endl;
         std::cout << "Creating new chunk at position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
-        chunk.initializeChunk(noise);
+        chunk.initializeChunk(noise1, noise2, weight1, weight2, THRESHOLD);
         saveChunkToFile(chunk, filename);
     }
 

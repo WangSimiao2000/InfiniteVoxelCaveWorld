@@ -15,18 +15,23 @@ Chunk::Chunk()
     :   Chunk(16, glm::vec3(0.0f)) {}
 
 // ³õÊ¼»¯Çø¿é
-void Chunk::initializeChunk(FastNoiseLite& noise) {
+void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float weight1, float weight2, float THRESHOLD) {
     voxelPositions.clear();
     for (int x = 0; x < size; ++x) {
         for (int y = 0; y < size; ++y) {
             for (int z = 0; z < size; ++z) {
-				float THRESHOLD = 0.3f;
-                float noiseValue = noise.GetNoise(position.x + x, position.y + y, position.z + z);
-                if (noiseValue < THRESHOLD)
+                float noiseValue1 = noise1.GetNoise(position.x + x, position.y + y, position.z + z);
+                float noiseValue2 = noise2.GetNoise(position.x + x, position.y + y, position.z + z);
+                float combinedNoiseValue = weight1 * noiseValue1 + weight2 * noiseValue2;
+                if (combinedNoiseValue < THRESHOLD)
                 {
                     chunkBlocks[x][y][z] = true;
                     voxelPositions.push_back(glm::vec3(x, y, z));
-                }
+				}
+				else
+				{
+					chunkBlocks[x][y][z] = false;
+				}
             }
         }
     }
