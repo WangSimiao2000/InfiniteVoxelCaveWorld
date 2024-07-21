@@ -66,16 +66,6 @@ void Chunk::generateVisibleFaces() {
     }
 }
 
-glm::vec3 Chunk::getMinBounds() const
-{
-	return position;
-}
-
-glm::vec3 Chunk::getMaxBounds() const
-{
-	return position + glm::vec3(size);
-}
-
 // 判断坐标(x, y, z)处是否有体素
 bool Chunk::isVoxelAt(int x, int y, int z) const {
     if (x >= 0 && x < size && y >= 0 && y < size && z >= 0 && z < size) {

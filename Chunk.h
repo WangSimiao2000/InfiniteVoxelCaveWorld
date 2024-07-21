@@ -28,8 +28,7 @@ public:
     const std::vector<std::vector<std::vector<bool>>>& getChunkBlocks() const;
     const std::vector<glm::vec3>& getVoxelPositions() const;
     void generateVisibleFaces();
-	glm::vec3 getMinBounds() const;// 获取区块的最小边界
-	glm::vec3 getMaxBounds() const;// 获取区块的最大边界
+
 
 private:
     int size;

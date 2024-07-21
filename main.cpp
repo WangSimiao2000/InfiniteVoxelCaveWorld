@@ -45,7 +45,7 @@ bool isWireframe = false;
 bool mouseRightPressed = false;
 bool cameraControlEnabled = true;
 
-int chunkSize = 16;//区块大小s
+int chunkSize = 16;//区块大小
 
 struct Frustum {
 	glm::vec4 planes[6];
@@ -91,6 +91,12 @@ struct Frustum {
 			}
 		}
 		return true;
+	}
+
+	bool isVoxelInFrustum(const glm::vec3& position) const {
+		glm::vec3 min = position - glm::vec3(0.5f, 0.5f, 0.5f);
+		glm::vec3 max = position + glm::vec3(0.5f, 0.5f, 0.5f);
+		return isAABBInFrustum(min, max);
 	}
 
 	// 检查AABB是否在视锥体内, 这里的AABB表示一个立方体，由最小点和最大点确定
@@ -409,19 +415,21 @@ int main()
 			//	glDrawArrays(GL_TRIANGLES, 0, 36); // 参数分别为绘制模式, 起始索引, 绘制顶点个数
 			//}
 			
-			// 通过区块的AABB盒子渲染体素
-			if (frustum.isAABBInFrustum(chunk.getMinBounds(), chunk.getMaxBounds())) {
-				// 通过可见面渲染体素
-				std::vector<std::pair<glm::vec3, Face>> visibleFaces = chunk.getVisibleFaces();
-				for (const auto& face : visibleFaces) {
+			// 通过可见面渲染体素
+			std::vector<std::pair<glm::vec3, Face>> visibleFaces = chunk.getVisibleFaces();
+			for (const auto& face : visibleFaces) {
+				// 如果该面所在的体素在视锥体内
+				//face.first是体素的位置
+				if (frustum.isVoxelInFrustum(face.first))
+				{
 					glm::mat4 model = glm::mat4(1.0f);
-					model = glm::translate(model, face.first);//face.first是体素的位置
+					model = glm::translate(model, face.first);
 					ourShader.setMat4("model", model);
 
 					switch (face.second) {
 					case Face::FRONT_FACE:
 						glDrawArrays(GL_TRIANGLES, 0, 6);
-							break;
+						break;
 					case Face::BACK_FACE:
 						glDrawArrays(GL_TRIANGLES, 6, 6);
 						break;
@@ -439,7 +447,7 @@ int main()
 						break;
 					}
 				}
-			}			
+			}		
 		}
 
 		// 渲染GUI
