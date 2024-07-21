@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <thread> 
+#include <mutex>
 #include <atomic> //原子操作
 
 #include "Shader.h"
@@ -23,6 +24,7 @@
 
 
 std::atomic<bool> updateChunks(true);
+std::mutex chunkManagerMutex; // 定义互斥锁
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -51,13 +53,16 @@ bool isWireframe = false;
 bool mouseRightPressed = false;
 bool cameraControlEnabled = true;
 
-int chunkSize = 32;//区块大小
+int chunkSize = 16;//区块大小
 
 void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& running) {
 	// 更新区块管理器
 	while (running)
 	{
-		chunkManager.update(camera.Position); // 更新区块管理器
+		{
+			std::lock_guard<std::mutex> lock(chunkManagerMutex); // 加锁
+			chunkManager.update(camera.Position); // 更新区块管理器
+		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 添加一个小的延迟以避免占用过多的CPU
 	}
 }
@@ -224,7 +229,6 @@ int main()
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());//获取当前时间
 		deltaTime = currentFrame - lastFrame;//计算时间差
-		float fps = 1.0f / deltaTime;//计算帧率
 		lastFrame = currentFrame;//更新上一帧时间
 
 		// 开始ImGui帧
@@ -248,7 +252,8 @@ int main()
 			// 禁用
 
 			{
-				ImGui::Text("FPS: %.1f", fps);//显示帧率
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);//显示帧率
+				ImGui::Text("Application delta time %.3fms", io.DeltaTime * 1000.0f);//显示每帧时间
 				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//显示相机位置		
 				ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//显示相机所在区块位置
 			}
@@ -331,7 +336,9 @@ int main()
 		frustum.calculateFrustum(projectionViewMatrix);
 
 		//glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
-				
+
+		std::lock_guard<std::mutex> lock(chunkManagerMutex); // 加锁
+
 		// 渲染当前加载的区块
 		for (const auto& chunkPair : chunkManager.getChunks()) {
 			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键

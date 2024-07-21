@@ -3,7 +3,7 @@
 // 构造函数，初始化区块大小
 ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
-    std::cout << "-------------- Initialize --------------" << std::endl;
+    //std::cout << "-------------- Initialize --------------" << std::endl;
 
 	// 保存最后一帧的摄像机位置
 	lastCameraPosition = glm::vec3(0.0f);
@@ -30,8 +30,8 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
     // 遍历摄像机周围的区块
     // 3×3的范围，即8个相邻区块加上摄像机所在的区块
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dz = -1; dz <= 1; ++dz) {
+    for (int dx = -2; dx <= 2; ++dx) {
+        for (int dz = -2; dz <= 2; ++dz) {
             glm::vec3 chunkPos = glm::vec3(dx, 0.0f, dz);// 计算相邻区块的位置
             chunkPos.x *= chunkSize;
             chunkPos.y *= chunkSize;
@@ -98,10 +98,10 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     if (cameraChunkPosition == lastCameraPosition) {
         return;
     }
-    std::cout << "-------------- Chunk has updated --------------" << std::endl;
+    //std::cout << "-------------- Chunk has updated --------------" << std::endl;
 
     // 打印摄像机所在的区块位置
-    std::cout << "Camera chunk position: " << cameraChunkPosition.x << ", " << cameraChunkPosition.y << ", " << cameraChunkPosition.z << std::endl;
+    //std::cout << "Camera chunk position: " << cameraChunkPosition.x << ", " << cameraChunkPosition.y << ", " << cameraChunkPosition.z << std::endl;
     // 打印当前已有的区块数量
     // std::cout << "Number of chunks: " << chunks.size() << std::endl;
     // 更新上一帧的摄像机位置
@@ -109,8 +109,8 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     
     // 遍历摄像机周围的区块
 	// 3×3的范围，即8个相邻区块加上摄像机所在的区块
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dz = -1; dz <= 1; ++dz) {
+    for (int dx = -2; dx <= 2; ++dx) {
+        for (int dz = -2; dz <= 2; ++dz) {
             glm::vec3 chunkPos = cameraChunkPosition + glm::vec3(dx, 0.0f, dz);// 计算相邻区块的位置
             chunkPos.x *= chunkSize;
             chunkPos.y *= chunkSize;
@@ -134,19 +134,19 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
 void ChunkManager::clearChunks()
 {
     chunks.clear(); // 清空已加载的区块
-    std::cout << "Cleared all loaded chunks." << std::endl;
+    //std::cout << "Cleared all loaded chunks." << std::endl;
 }
 
 void ChunkManager::stopLoading()
 {
     isLoading = false; // 停止加载区块
-    std::cout << "Stopped loading chunks." << std::endl;
+    //std::cout << "Stopped loading chunks." << std::endl;
 }
 
 void ChunkManager::startLoading()
 {
 	isLoading = true; // 开始加载区块
-	std::cout << "Started loading chunks." << std::endl;
+	//std::cout << "Started loading chunks." << std::endl;
 }
 
 // 加载区块
@@ -167,11 +167,11 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
         }
 		chunk.generateVisibleFaces();
         inFile.close();
-        std::cout << "Loaded chunk from file: " << filename << std::endl;
+        //std::cout << "Loaded chunk from file: " << filename << std::endl;
     }
     else {
-        std::cerr << "Failed to load chunk from file: " << filename << std::endl;
-        std::cout << "Creating new chunk at position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
+        //std::cerr << "Failed to load chunk from file: " << filename << std::endl;
+        //std::cout << "Creating new chunk at position: " << position.x << ", " << position.y << ", " << position.z << std::endl;
         chunk.initializeChunk(noise1, noise2, weight1, weight2, THRESHOLD);
         saveChunkToFile(chunk, filename);
     }
@@ -193,9 +193,9 @@ void ChunkManager::saveChunkToFile(const Chunk& chunk, const std::string& filena
             outFile.write(reinterpret_cast<const char*>(&pos), sizeof(glm::vec3));
         }
         outFile.close();
-        std::cerr << "Saved chunk to file: " << filename << std::endl;
+        //std::cerr << "Saved chunk to file: " << filename << std::endl;
     }
     else {
-        std::cerr << "Failed to save chunk to file: " << filename << std::endl;
+        //std::cerr << "Failed to save chunk to file: " << filename << std::endl;
     }
 }
