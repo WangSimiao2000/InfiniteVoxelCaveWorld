@@ -47,6 +47,67 @@ bool cameraControlEnabled = true;
 
 int chunkSize = 16;//区块大小s
 
+struct Frustum {
+	glm::vec4 planes[6];
+
+	// 计算视锥体平面
+	void calculateFrustum(const glm::mat4& projectionViewMatrix) {
+		planes[0] = glm::vec4(projectionViewMatrix[0][3] + projectionViewMatrix[0][0], // Left
+			projectionViewMatrix[1][3] + projectionViewMatrix[1][0],
+			projectionViewMatrix[2][3] + projectionViewMatrix[2][0],
+			projectionViewMatrix[3][3] + projectionViewMatrix[3][0]);
+		planes[1] = glm::vec4(projectionViewMatrix[0][3] - projectionViewMatrix[0][0], // Right
+			projectionViewMatrix[1][3] - projectionViewMatrix[1][0],
+			projectionViewMatrix[2][3] - projectionViewMatrix[2][0],
+			projectionViewMatrix[3][3] - projectionViewMatrix[3][0]);
+		planes[2] = glm::vec4(projectionViewMatrix[0][3] + projectionViewMatrix[0][1], // Bottom
+			projectionViewMatrix[1][3] + projectionViewMatrix[1][1],
+			projectionViewMatrix[2][3] + projectionViewMatrix[2][1],
+			projectionViewMatrix[3][3] + projectionViewMatrix[3][1]);
+		planes[3] = glm::vec4(projectionViewMatrix[0][3] - projectionViewMatrix[0][1], // Top
+			projectionViewMatrix[1][3] - projectionViewMatrix[1][1],
+			projectionViewMatrix[2][3] - projectionViewMatrix[2][1],
+			projectionViewMatrix[3][3] - projectionViewMatrix[3][1]);
+		planes[4] = glm::vec4(projectionViewMatrix[0][3] + projectionViewMatrix[0][2], // Near
+			projectionViewMatrix[1][3] + projectionViewMatrix[1][2],
+			projectionViewMatrix[2][3] + projectionViewMatrix[2][2],
+			projectionViewMatrix[3][3] + projectionViewMatrix[3][2]);
+		planes[5] = glm::vec4(projectionViewMatrix[0][3] - projectionViewMatrix[0][2], // Far
+			projectionViewMatrix[1][3] - projectionViewMatrix[1][2],
+			projectionViewMatrix[2][3] - projectionViewMatrix[2][2],
+			projectionViewMatrix[3][3] - projectionViewMatrix[3][2]);
+
+		for (int i = 0; i < 6; i++) {
+			float length = glm::length(glm::vec3(planes[i]));
+			planes[i] /= length;
+		}
+	}
+
+	// 检查点是否在视锥体内
+	bool isPointInFrustum(const glm::vec3& point) const {
+		for (int i = 0; i < 6; i++) {
+			if (glm::dot(glm::vec3(planes[i]), point) + planes[i].w <= 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// 检查AABB是否在视锥体内, 这里的AABB表示一个立方体，由最小点和最大点确定
+	bool isAABBInFrustum(const glm::vec3& min, const glm::vec3& max) const {
+		for (int i = 0; i < 6; i++) {
+			glm::vec3 p = min;
+			if (planes[i].x >= 0) p.x = max.x;
+			if (planes[i].y >= 0) p.y = max.y;
+			if (planes[i].z >= 0) p.z = max.z;
+			if (glm::dot(glm::vec3(planes[i]), p) + planes[i].w < 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+};
+
 int main()
 {
 	glfwInit();//初始化GLFW
@@ -225,78 +286,80 @@ int main()
 		lastFrame = currentFrame;//更新上一帧时间
 
 		// 开始ImGui帧
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		// 根据需要启用或禁用Dear ImGui对鼠标的绑定
-		if (cameraControlEnabled) {
-			io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // 设置标志，禁用鼠标
-		}
-		else {
-			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // 清除标志，启用鼠标
-		}
-
-		ImGui::SetNextWindowPos(ImVec2(5, 5));// 设置窗口位置
-		ImGui::SetNextWindowSize(ImVec2(435, 200));
-		ImGui::Begin("InfiniteVoxelWorld",nullptr, ImGuiWindowFlags_NoResize);// 创建窗口并显示信息
-
-		// 禁用
-		
 		{
-			ImGui::Text("FPS: %.1f", fps);//显示帧率
-			ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//显示相机位置		
-			ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//显示相机所在区块位置
-		}
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
 
-		ImGui::Separator(); // 添加分隔线
+			// 根据需要启用或禁用Dear ImGui对鼠标的绑定
+			if (cameraControlEnabled) {
+				io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // 设置标志，禁用鼠标
+			}
+			else {
+				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // 清除标志，启用鼠标
+			}
 
-		{
-			ImGui::BeginChild("Chunk Manage", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
-			// 重置按钮
-			if (ImGui::Button("Reset Chunks and Camera")) {
-				chunkManager.clearChunks();
-				camera.Position = glm::vec3(0.0f, 22.5f, 0.0f);
-			}
-			// 停止加载按钮
-			if (chunkManager.getIsLoading())
+			ImGui::SetNextWindowPos(ImVec2(5, 5));// 设置窗口位置
+			ImGui::SetNextWindowSize(ImVec2(435, 200));
+			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize);// 创建窗口并显示信息
+
+			// 禁用
+
 			{
-				if (ImGui::Button("Stop Loading Chunks")) {
-					chunkManager.stopLoading();
-				}
+				ImGui::Text("FPS: %.1f", fps);//显示帧率
+				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//显示相机位置		
+				ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//显示相机所在区块位置
 			}
-			else
+
+			ImGui::Separator(); // 添加分隔线
+
 			{
-				if (ImGui::Button("Start Loading Chunks")) {
-					chunkManager.startLoading();
+				ImGui::BeginChild("Chunk Manage", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
+				// 重置按钮
+				if (ImGui::Button("Reset Chunks and Camera")) {
+					chunkManager.clearChunks();
+					camera.Position = glm::vec3(0.0f, 22.5f, 0.0f);
 				}
+				// 停止加载按钮
+				if (chunkManager.getIsLoading())
+				{
+					if (ImGui::Button("Stop Loading Chunks")) {
+						chunkManager.stopLoading();
+					}
+				}
+				else
+				{
+					if (ImGui::Button("Start Loading Chunks")) {
+						chunkManager.startLoading();
+					}
+				}
+				ImGui::EndChild();
 			}
-			ImGui::EndChild(); 
+
+			ImGui::SameLine(); // 在同一行继续绘制
+
+			{
+				ImGui::BeginChild("Noise Weight Settings", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
+				static float weight1 = 1.0f;
+				float weight2 = 1.0f - weight1;
+
+				// 修改噪声权重
+				ImGui::SliderFloat("##", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
+				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
+				ImGui::Text("Perlin Weight: %.2f", weight2); // 显示自动计算的 weight2
+				// 应用噪声设置
+				if (ImGui::Button("Apply Weight")) {
+					chunkManager.setNoiseWeights(weight1, weight2);
+				}
+				ImGui::EndChild();
+			}
+
+			// 打印当前imgui窗口的大小
+			//ImVec2 windowSize = ImGui::GetWindowSize();
+			//ImGui::Text("Window Size: (%.0f, %.0f)", windowSize.x, windowSize.y);
+
+			ImGui::End();
 		}		
-
-		ImGui::SameLine(); // 在同一行继续绘制
-
-		{
-			ImGui::BeginChild("Noise Weight Settings", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
-			static float weight1 = 1.0f;
-			float weight2 = 1.0f - weight1;
-
-			// 修改噪声权重
-			ImGui::SliderFloat("##", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
-			ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
-			ImGui::Text("Perlin Weight: %.2f", weight2); // 显示自动计算的 weight2
-			// 应用噪声设置
-			if (ImGui::Button("Apply Weight")) {
-				chunkManager.setNoiseWeights(weight1, weight2);
-			}
-			ImGui::EndChild();
-		}
-
-		// 打印当前imgui窗口的大小
-		//ImVec2 windowSize = ImGui::GetWindowSize();
-		//ImGui::Text("Window Size: (%.0f, %.0f)", windowSize.x, windowSize.y);
-
-		ImGui::End();
 		
 		// 更新相机位置
 		glm::vec3 cameraPosition = camera.Position;
@@ -325,6 +388,10 @@ int main()
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);//透视投影
 		ourShader.setMat4("projection", projection);//设置投影矩阵
 
+		glm::mat4 projectionViewMatrix = projection * view;//投影矩阵 * 观察矩阵 = 投影观察矩阵
+		Frustum frustum;
+		frustum.calculateFrustum(projectionViewMatrix);
+
 		glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
 		//float timeValue = glfwGetTime(); // 获取当前时间
 				
@@ -341,35 +408,38 @@ int main()
 
 			//	glDrawArrays(GL_TRIANGLES, 0, 36); // 参数分别为绘制模式, 起始索引, 绘制顶点个数
 			//}
+			
+			// 通过区块的AABB盒子渲染体素
+			if (frustum.isAABBInFrustum(chunk.getMinBounds(), chunk.getMaxBounds())) {
+				// 通过可见面渲染体素
+				std::vector<std::pair<glm::vec3, Face>> visibleFaces = chunk.getVisibleFaces();
+				for (const auto& face : visibleFaces) {
+					glm::mat4 model = glm::mat4(1.0f);
+					model = glm::translate(model, face.first);//face.first是体素的位置
+					ourShader.setMat4("model", model);
 
-			// 通过可见面渲染体素
-			std::vector<std::pair<glm::vec3, Face>> visibleFaces = chunk.getVisibleFaces();
-			for (const auto& face : visibleFaces) {
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, face.first);//face.first是体素的位置
-				ourShader.setMat4("model", model);
-
-				switch (face.second) {
-				case Face::FRONT_FACE:
-					glDrawArrays(GL_TRIANGLES, 0, 6);
-					break;
-				case Face::BACK_FACE:
-					glDrawArrays(GL_TRIANGLES, 6, 6);
-					break;
-				case Face::TOP_FACE:
-					glDrawArrays(GL_TRIANGLES, 12, 6);
-					break;
-				case Face::BOTTOM_FACE:
-					glDrawArrays(GL_TRIANGLES, 18, 6);
-					break;
-				case Face::RIGHT_FACE:
-					glDrawArrays(GL_TRIANGLES, 24, 6);
-					break;
-				case Face::LEFT_FACE:
-					glDrawArrays(GL_TRIANGLES, 30, 6);
-					break;
+					switch (face.second) {
+					case Face::FRONT_FACE:
+						glDrawArrays(GL_TRIANGLES, 0, 6);
+							break;
+					case Face::BACK_FACE:
+						glDrawArrays(GL_TRIANGLES, 6, 6);
+						break;
+					case Face::TOP_FACE:
+						glDrawArrays(GL_TRIANGLES, 12, 6);
+						break;
+					case Face::BOTTOM_FACE:
+						glDrawArrays(GL_TRIANGLES, 18, 6);
+						break;
+					case Face::RIGHT_FACE:
+						glDrawArrays(GL_TRIANGLES, 24, 6);
+						break;
+					case Face::LEFT_FACE:
+						glDrawArrays(GL_TRIANGLES, 30, 6);
+						break;
+					}
 				}
-			}
+			}			
 		}
 
 		// 渲染GUI
