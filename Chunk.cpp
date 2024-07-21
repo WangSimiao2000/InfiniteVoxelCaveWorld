@@ -14,6 +14,11 @@ Chunk::Chunk(int size, const glm::vec3& position)
 Chunk::Chunk()
     :   Chunk(16, glm::vec3(0.0f)) {}
 
+// 析构函数，释放VAO和VBO, 会在对象销毁时调用, 有参数的构造函数在对象销毁时也会调用
+Chunk::~Chunk()
+{
+}
+
 // 初始化区块
 void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float weight1, float weight2, float THRESHOLD) {
     voxelPositions.clear();
@@ -54,16 +59,67 @@ void Chunk::generateVisibleFaces() {
         for (int y = 0; y < size; ++y) {
             for (int z = 0; z < size; ++z) {
                 if (chunkBlocks[x][y][z]) {
-                    if (!isVoxelAt(x + 1, y, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::RIGHT_FACE);
-                    if (!isVoxelAt(x - 1, y, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::LEFT_FACE);
-                    if (!isVoxelAt(x, y + 1, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::TOP_FACE);
-                    if (!isVoxelAt(x, y - 1, z)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::BOTTOM_FACE);
-                    if (!isVoxelAt(x, y, z + 1)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::FRONT_FACE);
-                    if (!isVoxelAt(x, y, z - 1)) visibleFaces.emplace_back(glm::vec3(x, y, z) + position, Face::BACK_FACE);
+                    glm::vec3 voxelPosition = glm::vec3(x, y, z) + position;
+                    if (!isVoxelAt(x + 1, y, z)) {
+                        visibleFaces.emplace_back(voxelPosition, Face::RIGHT_FACE);
+                        for (int i = 24; i < 30; ++i) {
+                            chunkVisibleFacesVertices.push_back({ voxelVertices[i].position + voxelPosition, voxelVertices[i].texCoords });
+                        }
+                    }
+                    if (!isVoxelAt(x - 1, y, z)) {
+                        visibleFaces.emplace_back(voxelPosition, Face::LEFT_FACE);
+                        for (int i = 30; i < 36; ++i) {
+                            chunkVisibleFacesVertices.push_back({ voxelVertices[i].position + voxelPosition, voxelVertices[i].texCoords });
+                        }
+                    }
+                    if (!isVoxelAt(x, y + 1, z)) {
+                        visibleFaces.emplace_back(voxelPosition, Face::TOP_FACE);
+                        for (int i = 12; i < 18; ++i) {
+                            chunkVisibleFacesVertices.push_back({ voxelVertices[i].position + voxelPosition, voxelVertices[i].texCoords });
+                        }
+                    }
+                    if (!isVoxelAt(x, y - 1, z)) {
+                        visibleFaces.emplace_back(voxelPosition, Face::BOTTOM_FACE);
+                        for (int i = 18; i < 24; ++i) {
+                            chunkVisibleFacesVertices.push_back({ voxelVertices[i].position + voxelPosition, voxelVertices[i].texCoords });
+                        }
+                    }
+                    if (!isVoxelAt(x, y, z + 1)) {
+                        visibleFaces.emplace_back(voxelPosition, Face::FRONT_FACE);
+                        for (int i = 0; i < 6; ++i) {
+                            chunkVisibleFacesVertices.push_back({ voxelVertices[i].position + voxelPosition, voxelVertices[i].texCoords });
+                        }
+                    }
+                    if (!isVoxelAt(x, y, z - 1)) {
+                        visibleFaces.emplace_back(voxelPosition, Face::BACK_FACE);
+                        for (int i = 6; i < 12; ++i) {
+                            chunkVisibleFacesVertices.push_back({ voxelVertices[i].position + voxelPosition, voxelVertices[i].texCoords });
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+glm::vec3 Chunk::getMaxBounds() const
+{
+    return position + glm::vec3(size);
+}
+
+glm::vec3 Chunk::getMinBounds() const
+{
+    return position;
+}
+
+std::vector<Vertex> Chunk::getChunkVisibleFacesVertices() const
+{
+	return chunkVisibleFacesVertices;
+}
+
+glm::vec3 Chunk::getChunkPosition() const
+{
+    return position;
 }
 
 // 判断坐标(x, y, z)处是否有体素
