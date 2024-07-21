@@ -252,8 +252,8 @@ int main()
 			// 禁用
 
 			{
-				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);//显示帧率
-				ImGui::Text("Application delta time %.3fms", io.DeltaTime * 1000.0f);//显示每帧时间
+				ImGui::Text("%.1f FPS (Average %.3f ms/frame)", io.Framerate, 1000.0f / io.Framerate);//显示帧率
+				ImGui::Text("Delta time %.3fms", io.DeltaTime * 1000.0f);//显示每帧时间
 				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//显示相机位置		
 				ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//显示相机所在区块位置
 			}
