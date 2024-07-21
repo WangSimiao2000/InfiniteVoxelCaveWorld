@@ -1,5 +1,51 @@
 #include "Chunk.h"
 
+// 单个体素的顶点数据
+extern std::vector<Vertex> voxelVertices = {
+    // Front face
+    {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+    {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
+    {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+    {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
+    {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
+    // Back face
+    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
+    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+    // Top face
+    {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
+    {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+    {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
+    {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
+    {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
+    {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
+    // Bottom face
+    {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
+    {{-0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+    {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+    {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+    // Right face
+    {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+    {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
+    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+    {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+    {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f}},
+    // Left face
+    {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
+    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+    {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+    {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}}
+};
+
 // 初始化区块的边长和位置; 分配三维布尔数组的内存, 表示每个体素是否被填充; 初始化梯度向量数组
 Chunk::Chunk(int size, const glm::vec3& position)
     : size(size), position(position)
@@ -59,7 +105,7 @@ void Chunk::generateVisibleFaces() {
         for (int y = 0; y < size; ++y) {
             for (int z = 0; z < size; ++z) {
                 if (chunkBlocks[x][y][z]) {
-                    glm::vec3 voxelPosition = glm::vec3(x, y, z) + position;
+                    glm::vec3 voxelPosition = glm::vec3(x, y, z);
                     if (!isVoxelAt(x + 1, y, z)) {
                         visibleFaces.emplace_back(voxelPosition, Face::RIGHT_FACE);
                         for (int i = 24; i < 30; ++i) {

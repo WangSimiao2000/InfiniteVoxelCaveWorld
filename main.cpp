@@ -162,91 +162,10 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);          // 第二个参数是是否捕捉鼠标, 这里的YOUR_WINDOW是你的GLFW窗口,应该改成你的窗口变量名
 	ImGui_ImplOpenGL3_Init();
 
-	// ---- 设置顶点数据和索引数据 - START ---- //
-	// 单个体素的顶点数据
-	float vertices[] = {
-		// 顶点坐标          // 纹理坐标
-		// Front face
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f, 0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-
-		// Back face
-		0.5f,  0.5f,  -0.5f,  0.0f, 1.0f,
-		0.5f,  -0.5f, -0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		-0.5f, 0.5f,  -0.5f,  1.0f, 1.0f,
-
-		// Top face
-		0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
-		0.5f,  0.5f,  -0.5f,  1.0f, 1.0f,
-		-0.5f, 0.5f,  -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
-		-0.5f, 0.5f,  -0.5f,  0.0f, 1.0f,
-		-0.5f, 0.5f,  0.5f,   0.0f, 0.0f,
-
-        // Bottom face
-		0.5f,  -0.5f,  0.5f,   1.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,   0.0f, 1.0f,
-		-0.5f, -0.5f,  -0.5f,  0.0f, 0.0f,
-		0.5f,  -0.5f,  0.5f,   1.0f, 1.0f,
-		-0.5f, -0.5f,  -0.5f,  0.0f, 0.0f,
-		0.5f,  -0.5f,  -0.5f,  1.0f, 0.0f,
-
-		// Right face
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 0.0f,
-
-		// Left face
-		- 0.5f,	0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	};
-
-	// ---- 设置顶点数据和索引数据 - END ---- //
-
-	// ---- 绑定顶点数据到缓冲对象 - START ---- //
-	unsigned int VAO;//VAO对象是一个容器对象，存储了我们之后定义的顶点属性状态
-	glGenVertexArrays(1, &VAO);//生成一个带有缓冲ID的VAO对象
-	glBindVertexArray(VAO);//绑定VAO对象
-
-	unsigned int VBO;//VBO对象是一个缓冲对象，用于将顶点数据传递到显卡
-	glGenBuffers(1, &VBO);//生成一个带有缓冲ID的VBO对象
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);//绑定缓冲对象
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);//将顶点数据复制到缓冲的内存中
-
-	// 告诉OpenGL该如何解析顶点数据 
-	// 顶点属性位置值为0, location = 0, 意味着我们在顶点着色器中使用layout(location = 0)定义的顶点属性
-	// 顶点属性大小为3, 数据类型为GL_FLOAT, 
-	// 是否标准化为GL_FALSE, 
-	// 步长为3 * sizeof(float), 
-	// 在缓冲中起始位置为0
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// 纹理坐标属性
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);//解绑VBO
-	//glBindVertexArray(0);//解绑VAO
-	// ---- 绑定顶点数据到缓冲对象 - END ---- //
-
-
 	// ---- 加载和创建纹理 - START ---- //
 	unsigned int texture;//纹理ID
 	glGenTextures(1, &texture);//生成纹理对象
+	// 这段可以写在循环外面, 因为我们渲染时不会改变纹理, 所以这段代码只需要在渲染循环外执行一次即可(多个纹理也是一样, 除非我们需要在渲染时改变纹理, 这时就需要在渲染循环内执行)
 	glActiveTexture(GL_TEXTURE0);//激活纹理单元, 默认激活的是GL_TEXTURE0, 所以这行代码其实可以省略
 	glBindTexture(GL_TEXTURE_2D, texture);//绑定纹理对象
 	// 设置纹理环绕方式
@@ -379,10 +298,6 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //设置清空屏幕所用的颜色为深蓝色
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);//清空颜色缓冲
 
-		// 这段可以写在循环外面, 因为我们渲染时不会改变纹理, 所以这段代码只需要在渲染循环外执行一次即可(多个纹理也是一样, 除非我们需要在渲染时改变纹理, 这时就需要在渲染循环内执行)
-		//glActiveTexture(GL_TEXTURE0);//激活纹理单元, 默认激活的是GL_TEXTURE0, 所以这行代码其实可以省略
-		//glBindTexture(GL_TEXTURE_2D, texture);//绑定纹理对象
-
 		ourShader.use();//使用着色器程序
 
 		ourShader.setVec3("viewPos", cameraPosition); // 将相机位置传递给着色器
@@ -398,56 +313,48 @@ int main()
 		Frustum frustum;
 		frustum.calculateFrustum(projectionViewMatrix);
 
-		glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
-		//float timeValue = glfwGetTime(); // 获取当前时间
+		//glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
 				
 		// 渲染当前加载的区块
 		for (const auto& chunkPair : chunkManager.getChunks()) {
 			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
 			
-			// 通过体素世界坐标渲染体素
-			//std::vector<glm::vec3> worldVoxelPositions = chunk.getVoxelWorldPositions();
-			//for (unsigned int i = 0; i < worldVoxelPositions.size(); i++) {
-			//	glm::mat4 model = glm::mat4(1.0f); // 模型矩阵
-			//	model = glm::translate(model, worldVoxelPositions[i]);
-			//	ourShader.setMat4("model", model); // 设置模型矩阵
-
-			//	glDrawArrays(GL_TRIANGLES, 0, 36); // 参数分别为绘制模式, 起始索引, 绘制顶点个数
-			//}
-			
 			// 通过可见面渲染体素
 			std::vector<std::pair<glm::vec3, Face>> visibleFaces = chunk.getVisibleFaces();
-			for (const auto& face : visibleFaces) {
-				// 如果该面所在的体素在视锥体内
-				//face.first是体素的位置
-				if (frustum.isVoxelInFrustum(face.first))
-				{
-					glm::mat4 model = glm::mat4(1.0f);
-					model = glm::translate(model, face.first);
-					ourShader.setMat4("model", model);
 
-					switch (face.second) {
-					case Face::FRONT_FACE:
-						glDrawArrays(GL_TRIANGLES, 0, 6);
-						break;
-					case Face::BACK_FACE:
-						glDrawArrays(GL_TRIANGLES, 6, 6);
-						break;
-					case Face::TOP_FACE:
-						glDrawArrays(GL_TRIANGLES, 12, 6);
-						break;
-					case Face::BOTTOM_FACE:
-						glDrawArrays(GL_TRIANGLES, 18, 6);
-						break;
-					case Face::RIGHT_FACE:
-						glDrawArrays(GL_TRIANGLES, 24, 6);
-						break;
-					case Face::LEFT_FACE:
-						glDrawArrays(GL_TRIANGLES, 30, 6);
-						break;
-					}
-				}
-			}		
+			// 通过可见区块渲染体素
+			if (frustum.isAABBInFrustum(chunk.getMinBounds(), chunk.getMaxBounds()))
+			{
+				glm::mat4 model = glm::mat4(1.0f); // 模型矩阵
+				model = glm::translate(model, chunk.getChunkPosition());
+				ourShader.setMat4("model", model); // 设置模型矩阵
+
+				const auto& vertices = chunk.getChunkVisibleFacesVertices();
+
+				unsigned int VAO, VBO;
+				glGenVertexArrays(1, &VAO);
+				glGenBuffers(1, &VBO);
+
+				glBindVertexArray(VAO);
+
+				glBindBuffer(GL_ARRAY_BUFFER, VBO);
+				glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+
+				// 设置顶点位置属性
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+				glEnableVertexAttribArray(0);
+
+				// 设置纹理坐标属性
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+				glEnableVertexAttribArray(1);
+
+				// 绘制顶点数据
+				glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+				// 解绑 VAO 和 VBO
+				glBindVertexArray(0);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
 		}
 
 		// 渲染GUI
@@ -462,8 +369,8 @@ int main()
 	}
 
 	// 可选: 释放所有资源
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	/*glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);*/
 
 	// 渲染结束后清理ImGui
 	ImGui_ImplOpenGL3_Shutdown();
