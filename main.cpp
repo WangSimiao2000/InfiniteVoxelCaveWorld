@@ -378,6 +378,10 @@ int main()
 				// 解绑 VAO 和 VBO
 				glBindVertexArray(0);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+				// 删除 VAO 和 VBO, 释放资源, 避免内存泄漏
+				glDeleteVertexArrays(1, &VAO);
+				glDeleteBuffers(1, &VBO);
 			}
 		}
 

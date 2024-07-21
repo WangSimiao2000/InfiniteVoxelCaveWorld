@@ -30,8 +30,8 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
     // 遍历摄像机周围的区块
     // 3×3的范围，即8个相邻区块加上摄像机所在的区块
-    for (int dx = -2; dx <= 2; ++dx) {
-        for (int dz = -2; dz <= 2; ++dz) {
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dz = -1; dz <= 1; ++dz) {
             glm::vec3 chunkPos = glm::vec3(dx, 0.0f, dz);// 计算相邻区块的位置
             chunkPos.x *= chunkSize;
             chunkPos.y *= chunkSize;
@@ -98,6 +98,9 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     if (cameraChunkPosition == lastCameraPosition) {
         return;
     }
+
+	// 清除内存中的区块数据
+	chunks.clear();
     //std::cout << "-------------- Chunk has updated --------------" << std::endl;
 
     // 打印摄像机所在的区块位置
@@ -109,8 +112,8 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     
     // 遍历摄像机周围的区块
 	// 3×3的范围，即8个相邻区块加上摄像机所在的区块
-    for (int dx = -2; dx <= 2; ++dx) {
-        for (int dz = -2; dz <= 2; ++dz) {
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dz = -1; dz <= 1; ++dz) {
             glm::vec3 chunkPos = cameraChunkPosition + glm::vec3(dx, 0.0f, dz);// 计算相邻区块的位置
             chunkPos.x *= chunkSize;
             chunkPos.y *= chunkSize;
