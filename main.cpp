@@ -36,7 +36,7 @@ const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 750;
 
 // camera
-Camera camera(glm::vec3(0.0f, 22.5f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
+Camera camera(glm::vec3(0.0f, 150.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
 
 //Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));//创建摄像机对象, 参数分别为摄像机的位置
 
@@ -446,11 +446,11 @@ void processInput(GLFWwindow* window)
 	// 上下移动
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
-		camera.Position.y -= camera.MovementSpeed * deltaTime;
+		camera.Position.y -= camera.MovementSpeed * deltaTime * 2;
 	}
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
-		camera.Position.y += camera.MovementSpeed * deltaTime;
+		camera.Position.y += camera.MovementSpeed * deltaTime * 2;
 	}
 
 	// 按下右键切换相机控制

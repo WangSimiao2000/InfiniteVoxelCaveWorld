@@ -29,7 +29,7 @@ private:
     float weight2 = 0.0f; // 第二种噪声的权重
 	float THRESHOLD = 0.3f; // 阈值
 	int SEED = 1234; // 随机种子
-    bool isLoading = true; // 标志是否正在加载区块
+    bool isLoading = false; // 标志是否正在加载区块
     std::unordered_map<std::string, Chunk> chunks;
 
     std::string getChunkKey(const glm::vec3& position);

@@ -48,12 +48,12 @@ extern std::vector<Vertex> voxelVertices = {
 
 // 初始化区块的边长和位置; 分配三维布尔数组的内存, 表示每个体素是否被填充; 初始化梯度向量数组
 Chunk::Chunk(int size, const glm::vec3& position)
-    : size(size), position(position)
+    : chunkWidthSize(size), position(position)
 {
     chunkBlocks = std::vector<std::vector<std::vector<bool>>>(size,
-        std::vector<std::vector<bool>>(size,
+        std::vector<std::vector<bool>>(chunkHeight,
 			std::vector<bool>(size, false)));// 初始化三维布尔数组，表示每个体素是否被填充, 默认为false
-	voxelPositions.reserve(size * size * size);
+	voxelPositions.reserve(size * chunkHeight * size);
 }
 
 // 默认构造函数，初始化区块大小为16，位置为原点
@@ -66,23 +66,46 @@ Chunk::~Chunk()
 }
 
 // 初始化区块
+//void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float weight1, float weight2, float THRESHOLD) {
+//    voxelPositions.clear();
+//    for (int x = 0; x < size; ++x) {
+//        for (int y = 0; y < size; ++y) {
+//            for (int z = 0; z < size; ++z) {
+//                float noiseValue1 = noise1.GetNoise(position.x + x, position.y + y, position.z + z);
+//                float noiseValue2 = noise2.GetNoise(position.x + x, position.y + y, position.z + z);
+//                float combinedNoiseValue = weight1 * noiseValue1 + weight2 * noiseValue2;
+//                if (combinedNoiseValue < THRESHOLD)
+//                {
+//                    chunkBlocks[x][y][z] = true;
+//                    voxelPositions.push_back(glm::vec3(x, y, z));
+//				}
+//            }
+//        }
+//    }
+//    generateVisibleFaces();
+//}
+
 void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float weight1, float weight2, float THRESHOLD) {
     voxelPositions.clear();
-    for (int x = 0; x < size; ++x) {
-        for (int y = 0; y < size; ++y) {
-            for (int z = 0; z < size; ++z) {
-                float noiseValue1 = noise1.GetNoise(position.x + x, position.y + y, position.z + z);
-                float noiseValue2 = noise2.GetNoise(position.x + x, position.y + y, position.z + z);
-                float combinedNoiseValue = weight1 * noiseValue1 + weight2 * noiseValue2;
-                if (combinedNoiseValue < THRESHOLD)
-                {
+    for (int x = 0; x < chunkWidthSize; ++x) {
+        for (int z = 0; z < chunkWidthSize; ++z) {
+            // 计算地形高度
+            float noiseValue1 = noise1.GetNoise(position.x + x, position.z + z) * 0.75f;
+            float noiseValue2 = noise2.GetNoise(position.x + x, position.z + z) * 0.75f;
+            float combinedNoiseValue = weight1 * noiseValue1 + weight2 * noiseValue2;
+            int terrainHeight = chunkHeight - 4 + static_cast<int>((combinedNoiseValue + 1.0f) * 0.5f * 4);
+
+            for (int y = 0; y < terrainHeight; ++y) {
+                // 如果当前位置在地形高度以下
+                // 判断是否生成洞穴
+                float caveNoise1 = noise1.GetNoise(position.x + x, position.y + y, position.z + z);
+                float caveNoise2 = noise2.GetNoise(position.x + x, position.y + y, position.z + z);
+                float caveCombinedNoiseValue = weight1 * caveNoise1 + weight2 * caveNoise2;
+
+                if (caveCombinedNoiseValue < THRESHOLD) {
                     chunkBlocks[x][y][z] = true;
                     voxelPositions.push_back(glm::vec3(x, y, z));
-				}
-				else
-				{
-					chunkBlocks[x][y][z] = false;
-				}
+                }
             }
         }
     }
@@ -101,9 +124,9 @@ std::vector<glm::vec3> Chunk::getVoxelWorldPositions() const {
 // 将可见面添加到visibleFaces数组中
 void Chunk::generateVisibleFaces() {
     visibleFaces.clear();
-    for (int x = 0; x < size; ++x) {
-        for (int y = 0; y < size; ++y) {
-            for (int z = 0; z < size; ++z) {
+    for (int x = 0; x < chunkWidthSize; ++x) {
+        for (int y = 0; y < chunkHeight; ++y) {
+            for (int z = 0; z < chunkWidthSize; ++z) {
                 if (chunkBlocks[x][y][z]) {
                     glm::vec3 voxelPosition = glm::vec3(x, y, z);
                     if (!isVoxelAt(x + 1, y, z)) {
@@ -150,7 +173,7 @@ void Chunk::generateVisibleFaces() {
 
 glm::vec3 Chunk::getMaxBounds() const
 {
-    return position + glm::vec3(size);
+    return position + glm::vec3(chunkWidthSize, chunkHeight, chunkWidthSize);
 }
 
 glm::vec3 Chunk::getMinBounds() const
@@ -170,7 +193,7 @@ glm::vec3 Chunk::getChunkPosition() const
 
 // 判断坐标(x, y, z)处是否有体素
 bool Chunk::isVoxelAt(int x, int y, int z) const {
-    if (x >= 0 && x < size && y >= 0 && y < size && z >= 0 && z < size) {
+    if (x >= 0 && x < chunkWidthSize && y >= 0 && y < chunkHeight && z >= 0 && z < chunkWidthSize) {
         return chunkBlocks[x][y][z];
     }
     return false;
@@ -182,7 +205,7 @@ void Chunk::addVoxel(const glm::vec3& pos) {
     int y = static_cast<int>(pos.y);
     int z = static_cast<int>(pos.z);
 
-    if (x >= 0 && x < size && y >= 0 && y < size && z >= 0 && z < size) {
+    if (x >= 0 && x < chunkWidthSize && y >= 0 && y < chunkHeight && z >= 0 && z < chunkWidthSize) {
 		chunkBlocks[x][y][z] = true;
         voxelPositions.push_back(pos);
     }
