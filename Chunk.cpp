@@ -90,16 +90,19 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
     for (int x = 0; x < chunkWidthSize; ++x) {
         for (int z = 0; z < chunkWidthSize; ++z) {
             // 计算地形高度
-            float noiseValue1 = noise1.GetNoise(position.x + x, position.z + z) * 0.75f;
-            float noiseValue2 = noise2.GetNoise(position.x + x, position.z + z) * 0.75f;
+            // 调整噪声的幅度
+            float amplitude = 0.5f;
+            float noiseValue1 = noise1.GetNoise(position.x + x, position.z + z) * amplitude;
+            float noiseValue2 = noise2.GetNoise(position.x + x, position.z + z) * amplitude;
             float combinedNoiseValue = weight1 * noiseValue1 + weight2 * noiseValue2;
             int terrainHeight = chunkHeight - 4 + static_cast<int>((combinedNoiseValue + 1.0f) * 0.5f * 4);
 
-            for (int y = 0; y < terrainHeight; ++y) {
+            for (int y = 0; y < terrainHeight - 16; ++y) {
                 // 如果当前位置在地形高度以下
                 // 判断是否生成洞穴
-                float caveNoise1 = noise1.GetNoise(position.x + x, position.y + y, position.z + z);
-                float caveNoise2 = noise2.GetNoise(position.x + x, position.y + y, position.z + z);
+                float frequency = 0.7f;
+                float caveNoise1 = noise1.GetNoise((position.x + x) * frequency, (position.y + y) * frequency, (position.z + z) * frequency);
+                float caveNoise2 = noise2.GetNoise((position.x + x) * frequency, (position.y + y) * frequency, (position.z + z) * frequency);
                 float caveCombinedNoiseValue = weight1 * caveNoise1 + weight2 * caveNoise2;
 
                 if (caveCombinedNoiseValue < THRESHOLD) {

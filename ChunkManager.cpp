@@ -19,7 +19,7 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
     noise1.SetFrequency(0.1f);
     noise1.SetSeed(SEED);
 
-    noise2.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     noise2.SetFrequency(0.1f);
     noise2.SetSeed(SEED);
 

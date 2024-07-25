@@ -36,7 +36,8 @@ const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 750;
 
 // camera
-Camera camera(glm::vec3(0.0f, 150.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
+// Camera camera(glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
+Camera camera(glm::vec3(50.0f, 58.0f, 74.0f), glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
 
 //Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));//创建摄像机对象, 参数分别为摄像机的位置
 
@@ -50,8 +51,8 @@ float lastFrame = 0.0f;// 上一帧的时间
 
 // 全局变量用于记录当前的绘图模式
 bool isWireframe = false;
-bool mouseRightPressed = false;
-bool cameraControlEnabled = true;
+bool mouseRightPressed = true;
+bool cameraControlEnabled = false;
 
 int chunkSize = 16;//区块大小
 
@@ -293,7 +294,7 @@ int main()
 				// 修改噪声权重
 				ImGui::SliderFloat("##", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
 				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
-				ImGui::Text("Perlin Weight: %.2f", weight2); // 显示自动计算的 weight2
+				ImGui::Text("OpenSimplex2S Weight: %.2f", weight2); // 显示自动计算的 weight2
 				// 应用噪声设置
 				if (ImGui::Button("Apply Weight")) {
 					chunkManager.setNoiseWeights(weight1, weight2);

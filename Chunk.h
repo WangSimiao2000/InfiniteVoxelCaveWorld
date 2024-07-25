@@ -42,7 +42,7 @@ public:
 
 private:
     int chunkWidthSize;
-	int chunkHeight = 128;
+	int chunkHeight = 64;
     std::vector<glm::vec3> voxelPositions;
 	glm::vec3 position;// 区块的位置(世界坐标)
     std::vector<std::vector<std::vector<bool>>> chunkBlocks;
