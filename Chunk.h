@@ -47,7 +47,6 @@ private:
 	glm::vec3 position;// 区块的位置(世界坐标)
     std::vector<std::vector<std::vector<bool>>> chunkBlocks;
     std::vector<std::pair<glm::vec3, Face>> visibleFaces;
-    unsigned int VAO, VBO;
     std::vector<Vertex> chunkVisibleFacesVertices;
     bool isVoxelAt(int x, int y, int z) const;
 };

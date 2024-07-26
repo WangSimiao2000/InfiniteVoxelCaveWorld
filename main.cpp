@@ -57,7 +57,7 @@ bool cameraControlEnabled = false;
 
 int chunkSize = 16;//区块大小
 
-void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& running) {
+static void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& running) {
 	// 更新区块管理器
 	while (running)
 	{
@@ -267,7 +267,7 @@ int main()
 		ourShader.setMat4("projection", projection);//设置投影矩阵
 
 		glm::mat4 projectionViewMatrix = projection * view;//投影矩阵 * 观察矩阵 = 投影观察矩阵
-		Frustum frustum;
+		Frustum frustum{};
 		frustum.calculateFrustum(projectionViewMatrix);
 
 		//glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
