@@ -152,6 +152,7 @@
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="ChunkManager.h" />
     <ClInclude Include="FastNoiseLite.h" />
+    <ClInclude Include="Frustum.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="FragmentShader.frag" />
     <None Include="VertexShader.vert" />
   </ItemGroup>
