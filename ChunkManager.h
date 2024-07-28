@@ -22,7 +22,7 @@ public:
 	std::unordered_map<std::string, Chunk>& getChunks();
 
 private:
-	std::mutex chunksMutex;
+	std::mutex chunksMutex;// 互斥锁
     int chunkSize;
     glm::vec3 lastCameraPosition; // 上一帧的摄像机位置
     FastNoiseLite noise1; // 第一种噪声生成器

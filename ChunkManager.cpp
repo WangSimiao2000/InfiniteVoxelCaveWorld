@@ -15,11 +15,15 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
     // 配置噪声生成器
     // 初始化噪声生成器
+    //noise1.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     noise1.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    //noise1.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     noise1.SetFrequency(0.1f);
     noise1.SetSeed(SEED);
 
-    noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+    //noise2.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    //noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     noise2.SetFrequency(0.1f);
     noise2.SetSeed(SEED);
 
@@ -40,12 +44,12 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
             //这里的.find()函数是在unordered_map中查找键值为key的元素，如果找到了就返回指向该元素的迭代器，否则返回unordered_map::end()函数返回的迭代器
             if (chunks.find(key) == chunks.end()) {
-                //auto start = std::chrono::high_resolution_clock::now();// 计时开始
+                auto start = std::chrono::high_resolution_clock::now();// 计时开始
                 // 如果区块未被加载，则调用loadChunk加载区块
                 loadChunk(chunkPos);
-                //auto end = std::chrono::high_resolution_clock::now(); //记录结束时间
-                //std::chrono::duration<double> generationTime = end - start;
-                //std::cout << "Chunk generated " << key << " in " << generationTime.count() << " seconds." << std::endl;
+                auto end = std::chrono::high_resolution_clock::now(); //记录结束时间
+                std::chrono::duration<double> generationTime = end - start;
+                std::cout << "Chunk generated " << key << " in " << generationTime.count() << " seconds." << std::endl;
             }
             //  临时存储需要保留的区块
             tempChunks[key] = chunks[key];
