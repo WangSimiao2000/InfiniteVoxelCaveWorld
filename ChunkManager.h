@@ -33,6 +33,7 @@ private:
 	int SEED = 1234; // 随机种子
     bool isLoading = false; // 标志是否正在加载区块
     std::unordered_map<std::string, Chunk> chunks;
+	int viewDistance = 2; // 可视距离, 以区块为单位, 以相机为中心的正方形区域, 边长为2*2+1, 即所在区块加上两个方向各延申2个区块 
 
     std::string getChunkKey(const glm::vec3& position);
     void loadChunk(const glm::vec3& position);

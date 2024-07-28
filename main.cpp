@@ -182,7 +182,7 @@ int main()
 			}
 
 			ImGui::SetNextWindowPos(ImVec2(5, 5));// 设置窗口位置
-			ImGui::SetNextWindowSize(ImVec2(435, 200));
+			ImGui::SetNextWindowSize(ImVec2(435, 210));
 			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize);// 创建窗口并显示信息
 
 			// 禁用
@@ -222,7 +222,7 @@ int main()
 			ImGui::SameLine(); // 在同一行继续绘制
 
 			{
-				ImGui::BeginChild("Noise Weight Settings", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
+				ImGui::BeginChild("Noise Weight Settings", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 100是子窗口的高度, true表示子窗口有滚动条
 				static float weight1 = 1.0f;
 				float weight2 = 1.0f - weight1;
 
