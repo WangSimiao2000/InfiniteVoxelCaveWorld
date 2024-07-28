@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <thread> 
-#include <mutex>
 #include <atomic> //Ô­×Ó²Ù×÷
 
 #include "Shader.h"
@@ -25,7 +24,6 @@
 
 
 std::atomic<bool> updateChunks(true);
-std::mutex chunkManagerMutex; // ¶¨Òå»¥³âËø
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -36,10 +34,15 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);//¹öÂÖ»
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 750;
 
+
+glm::vec3 originLocation = glm::vec3(8.0f, 58.0f, 8.0f); // Ô­µãÎ»ÖÃ: ÔÚÔ­Ê¼µÄ9x9Çø¿éÖĞĞÄÉÏ·½
+//glm::vec3 originLocation = glm::vec3(50.0f, 58.0f, 74.0f); // Ô­µãÎ»ÖÃ: Ô¶¾àÀë¹Û²ìÕû¸ö³õÊ¼9x9Çø¿é
+//glm::vec3 originLocation = glm::vec3(0.0f, 58.0f, 0.0f); // Ô­µãÎ»ÖÃ: ½ü¾àÀë¹Û²ì¶´Ñ¨½á¹¹
+
 // camera
-// Camera camera(glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
-Camera camera(glm::vec3(50.0f, 58.0f, 74.0f), glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
-// Camera camera(glm::vec3(13.0f, 35.0f, 32.0f), glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
+Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
+//Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
+//Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
 
 //Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ
 
@@ -62,10 +65,7 @@ static void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& ru
 	// ¸üĞÂÇø¿é¹ÜÀíÆ÷
 	while (running)
 	{
-		{
-			std::lock_guard<std::mutex> lock(chunkManagerMutex); // ¼ÓËø
-			chunkManager.update(camera.Position); // ¸üĞÂÇø¿é¹ÜÀíÆ÷
-		}
+		chunkManager.update(camera.Position); // ¸üĞÂÇø¿é¹ÜÀíÆ÷
 		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Ìí¼ÓÒ»¸öĞ¡µÄÑÓ³ÙÒÔ±ÜÃâÕ¼ÓÃ¹ı¶àµÄCPU
 	}
 }
@@ -201,7 +201,7 @@ int main()
 				// ÖØÖÃ°´Å¥
 				if (ImGui::Button("Reset Chunks and Camera")) {
 					chunkManager.clearChunks();
-					camera.Position = glm::vec3(0.0f, 22.5f, 0.0f);
+					camera.Position = originLocation;
 				}
 				// Í£Ö¹¼ÓÔØ°´Å¥
 				if (chunkManager.getIsLoading())
@@ -273,7 +273,7 @@ int main()
 
 		//glBindVertexArray(VAO);//°ó¶¨VAO¶ÔÏó(Ö»ÓĞÒ»¸öVAO¶ÔÏóÊ±²»ÊÇ±ØĞëµÄ,µ«ÊÇÎÒÃÇ»¹ÊÇ°ó¶¨Ëü,ÒÔÑø³ÉºÃÏ°¹ß)
 
-		std::lock_guard<std::mutex> lock(chunkManagerMutex); // ¼ÓËø
+		//std::lock_guard<std::mutex> lock(chunkManagerMutex); // ¼ÓËø
 
 		// äÖÈ¾µ±Ç°¼ÓÔØµÄÇø¿é
 		for (const auto& chunkPair : chunkManager.getChunks()) {

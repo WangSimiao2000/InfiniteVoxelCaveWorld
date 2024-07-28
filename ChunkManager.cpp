@@ -30,8 +30,8 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
     // 遍历摄像机周围的区块
     // 3×3的范围，即8个相邻区块加上摄像机所在的区块
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dz = -1; dz <= 1; ++dz) {
+    for (int dx = -2; dx <= 2; ++dx) {
+        for (int dz = -2; dz <= 2; ++dz) {
             glm::vec3 chunkPos = glm::vec3(dx, 0.0f, dz);// 计算相邻区块的位置
             chunkPos.x *= chunkSize;
             //chunkPos.y *= chunkSize;
@@ -40,8 +40,12 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
             //这里的.find()函数是在unordered_map中查找键值为key的元素，如果找到了就返回指向该元素的迭代器，否则返回unordered_map::end()函数返回的迭代器
             if (chunks.find(key) == chunks.end()) {
+                auto start = std::chrono::high_resolution_clock::now();// 计时开始
                 // 如果区块未被加载，则调用loadChunk加载区块
                 loadChunk(chunkPos);
+                auto end = std::chrono::high_resolution_clock::now(); //记录结束时间
+                std::chrono::duration<double> generationTime = end - start;
+                std::cout << "Chunk generated" << key << " in " << generationTime.count() << " seconds." << std::endl;
             }
             //  临时存储需要保留的区块
             tempChunks[key] = chunks[key];
@@ -75,6 +79,7 @@ bool ChunkManager::getIsLoading() const
 
 std::unordered_map<std::string, Chunk>& ChunkManager::getChunks()
 {
+    std::lock_guard<std::mutex> lock(chunksMutex);
 	return chunks;
 }
 
@@ -101,7 +106,7 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     }
 
 	// 清除内存中的区块数据
-	chunks.clear();
+	//chunks.clear();
     //std::cout << "-------------- Chunk has updated --------------" << std::endl;
 
     // 打印摄像机所在的区块位置
@@ -113,8 +118,8 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     
     // 遍历摄像机周围的区块
 	// 3×3的范围，即8个相邻区块加上摄像机所在的区块
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dz = -1; dz <= 1; ++dz) {
+    for (int dx = -2; dx <= 2; ++dx) {
+        for (int dz = -2; dz <= 2; ++dz) {
             glm::vec3 chunkPos = cameraChunkPosition + glm::vec3(dx, 0.0f, dz);// 计算相邻区块的位置
             chunkPos.x *= chunkSize;
             chunkPos.z *= chunkSize;
@@ -122,8 +127,12 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
 
 			//这里的.find()函数是在unordered_map中查找键值为key的元素，如果找到了就返回指向该元素的迭代器，否则返回unordered_map::end()函数返回的迭代器
             if (chunks.find(key) == chunks.end()) {
+                auto start = std::chrono::high_resolution_clock::now();// 计时开始
                 // 如果区块未被加载，则调用loadChunk加载区块
                 loadChunk(chunkPos);
+                auto end = std::chrono::high_resolution_clock::now(); //记录结束时间
+                std::chrono::duration<double> generationTime = end - start;
+                std::cout << "Chunk generated" << key <<" in " << generationTime.count() << " seconds." << std::endl;
             }
             //  临时存储需要保留的区块
             tempChunks[key] = chunks[key];
@@ -131,11 +140,13 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
     }
     
     // 更新chunks成员变量
+    std::lock_guard<std::mutex> lock(chunksMutex);
     chunks = tempChunks;
 }
 
 void ChunkManager::clearChunks()
 {
+    std::lock_guard<std::mutex> lock(chunksMutex);
     chunks.clear(); // 清空已加载的区块
     //std::cout << "Cleared all loaded chunks." << std::endl;
 }
@@ -181,6 +192,7 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
 
 
     // 将加载的区块存储到chunks中
+    std::lock_guard<std::mutex> lock(chunksMutex);
     chunks[key] = chunk;
 }
 

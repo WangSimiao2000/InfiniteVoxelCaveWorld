@@ -7,6 +7,7 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
+#include <mutex>
 #include "Chunk.h"
 
 class ChunkManager {
@@ -21,6 +22,7 @@ public:
 	std::unordered_map<std::string, Chunk>& getChunks();
 
 private:
+	std::mutex chunksMutex;
     int chunkSize;
     glm::vec3 lastCameraPosition; // 上一帧的摄像机位置
     FastNoiseLite noise1; // 第一种噪声生成器
