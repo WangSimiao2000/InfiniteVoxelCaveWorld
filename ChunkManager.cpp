@@ -117,7 +117,6 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
         for (int dz = -1; dz <= 1; ++dz) {
             glm::vec3 chunkPos = cameraChunkPosition + glm::vec3(dx, 0.0f, dz);// 计算相邻区块的位置
             chunkPos.x *= chunkSize;
-            //chunkPos.y *= chunkSize;
             chunkPos.z *= chunkSize;
             std::string key = getChunkKey(chunkPos);// 生成区块的键
 
@@ -198,8 +197,5 @@ void ChunkManager::saveChunkToFile(const Chunk& chunk, const std::string& filena
         }
         outFile.close();
         //std::cerr << "Saved chunk to file: " << filename << std::endl;
-    }
-    else {
-        //std::cerr << "Failed to save chunk to file: " << filename << std::endl;
     }
 }

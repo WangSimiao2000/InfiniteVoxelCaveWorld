@@ -95,9 +95,9 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
             float noiseValue1 = noise1.GetNoise(position.x + x, position.z + z) * amplitude;
             float noiseValue2 = noise2.GetNoise(position.x + x, position.z + z) * amplitude;
             float combinedNoiseValue = weight1 * noiseValue1 + weight2 * noiseValue2;
-            int terrainHeight = chunkHeight - 4 + static_cast<int>((combinedNoiseValue + 1.0f) * 0.5f * 4);
+			int terrainHeight = chunkHeight - 4 + static_cast<int>((combinedNoiseValue + 1.0f) * 0.5f * 4);// 这里的4是地形的最小高度
 
-            for (int y = 0; y < terrainHeight - 16; ++y) {
+			for (int y = 0; y < terrainHeight - 16; ++y) {//-16是为了避免地形太低，导致地形下方生成洞穴
                 // 如果当前位置在地形高度以下
                 // 判断是否生成洞穴
                 float frequency = 0.7f;

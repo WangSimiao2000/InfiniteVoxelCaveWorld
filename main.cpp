@@ -39,6 +39,7 @@ const unsigned int SCR_HEIGHT = 750;
 // camera
 // Camera camera(glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -105, -30);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
 Camera camera(glm::vec3(50.0f, 58.0f, 74.0f), glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
+// Camera camera(glm::vec3(13.0f, 35.0f, 32.0f), glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//创建摄像机对象, 参数分别为摄像机的位置, 世界上方向, Yaw角, Pitch角
 
 //Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));//创建摄像机对象, 参数分别为摄像机的位置
 
@@ -278,9 +279,6 @@ int main()
 		for (const auto& chunkPair : chunkManager.getChunks()) {
 			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
 			
-			// 通过可见面渲染体素
-			std::vector<std::pair<glm::vec3, Face>> visibleFaces = chunk.getVisibleFaces();
-
 			// 通过可见区块渲染体素
 			if (frustum.isAABBInFrustum(chunk.getMinBounds(), chunk.getMaxBounds()))
 			{
@@ -290,7 +288,7 @@ int main()
 
 				const auto& vertices = chunk.getChunkVisibleFacesVertices();
 
-				unsigned int VAO, VBO;
+				unsigned int VAO, VBO;//VAO是顶点数组对象, VBO是顶点缓冲对象
 				glGenVertexArrays(1, &VAO);
 				glGenBuffers(1, &VBO);
 
