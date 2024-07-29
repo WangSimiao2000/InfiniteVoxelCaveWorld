@@ -112,7 +112,6 @@
     <None Include="FragmentShader.frag">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="container.jpg">

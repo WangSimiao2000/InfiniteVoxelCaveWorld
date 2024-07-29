@@ -281,6 +281,7 @@ int main()
 			
 			// 通过可见区块渲染体素
 			if (frustum.isAABBInFrustum(chunk.getMinBounds(), chunk.getMaxBounds()))
+			//if (true)
 			{
 				glm::mat4 model = glm::mat4(1.0f); // 模型矩阵
 				model = glm::translate(model, chunk.getChunkPosition());
