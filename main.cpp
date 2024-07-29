@@ -207,7 +207,7 @@ int main()
 				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // 清除标志，启用鼠标
 			}
 
-			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);// 创建窗口并显示信息
+			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);// 创建窗口并显示信息
 			ImGui::SetNextWindowPos(ImVec2(0, 0));// 设置窗口位置
 			ImGui::SetNextWindowSize(ImVec2(float(ImGui_Width),float(SCR_HEIGHT)));
 
