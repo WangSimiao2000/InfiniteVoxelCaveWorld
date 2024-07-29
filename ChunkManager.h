@@ -18,12 +18,14 @@ public:
     void stopLoading();// 停止加载区块（可用于暂停区块的加载）
 	void startLoading();// 开始加载区块（可用于恢复区块的加载）    
     void setNoiseWeights(float weight1, float weight2);// 设置噪声权重
+	void setViewDistance(int distance);// 设置可视距离
+    void clearChunksFolder();// 清空区块文件夹
 	bool getIsLoading() const;
 	std::unordered_map<std::string, Chunk>& getChunks();
 
 private:
 	std::mutex chunksMutex;// 互斥锁
-    int chunkSize;
+	int chunkSize;// 区块大小
     glm::vec3 lastCameraPosition; // 上一帧的摄像机位置
     FastNoiseLite noise1; // 第一种噪声生成器
     FastNoiseLite noise2; // 第二种噪声生成器

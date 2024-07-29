@@ -18,9 +18,9 @@
 #include "ChunkManager.h"
 #include "Frustum.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
 
 
 std::atomic<bool> updateChunks(true);
@@ -31,9 +31,10 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);//鼠标回调函数
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);//滚轮回调函数
 
-const unsigned int SCR_WIDTH = 1200;
-const unsigned int SCR_HEIGHT = 750;
+unsigned int SCR_WIDTH = 1200;
+unsigned int SCR_HEIGHT = 600;
 
+const unsigned int ImGui_Width = 300;
 
 glm::vec3 originLocation = glm::vec3(8.0f, 58.0f, 8.0f); // 原点位置: 在原始的9x9区块中心上方
 //glm::vec3 originLocation = glm::vec3(50.0f, 58.0f, 74.0f); // 原点位置: 远距离观察整个初始9x9区块
@@ -59,7 +60,8 @@ bool isWireframe = false;
 bool mouseRightPressed = true;
 bool cameraControlEnabled = false;
 
-int chunkSize = 16;//区块大小
+unsigned int chunkSize = 16;//区块大小
+int viewDistance = 2;//视野区块距离
 
 static void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& running) {
 	// 更新区块管理器
@@ -93,8 +95,9 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);//设置鼠标回调函数
 	glfwSetScrollCallback(window, scroll_callback);//设置滚轮回调函数
 
+
 	// 告诉GLFW我们想要捕捉所有的鼠标输入
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))//初始化GLAD
 	{
@@ -102,13 +105,22 @@ int main()
 		return -1;
 	}
 
+	// 输出OpenGL版本,显卡型号等信息
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;//输出OpenGL版本
+	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;//输出显卡型号
+	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;//输出显卡厂商	
+
 	// 开启深度测试
 	glEnable(GL_DEPTH_TEST);
 
 	// 开启面剔除
 	glEnable(GL_CULL_FACE);
 
-	Shader ourShader("VertexShader.vert", "FragmentShader.frag");//创建着色器对象
+	Shader ourShader("shaders/VertexShader.vert", "shaders/FragmentShader.frag");//创建着色器对象
+	ourShader.use();//使用着色器程序
+
+	// 初始化ImGui
+	std::cout << "Initializing ImGui" << std::endl;
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -119,53 +131,67 @@ int main()
 	ImGui_ImplOpenGL3_Init();
 
 	// ---- 加载和创建纹理 - START ---- //
-	unsigned int texture;//纹理ID
-	glGenTextures(1, &texture);//生成纹理对象
-	// 这段可以写在循环外面, 因为我们渲染时不会改变纹理, 所以这段代码只需要在渲染循环外执行一次即可(多个纹理也是一样, 除非我们需要在渲染时改变纹理, 这时就需要在渲染循环内执行)
-	glActiveTexture(GL_TEXTURE0);//激活纹理单元, 默认激活的是GL_TEXTURE0, 所以这行代码其实可以省略
-	glBindTexture(GL_TEXTURE_2D, texture);//绑定纹理对象
-	// 设置纹理环绕方式
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//设置S轴的环绕方式为GL_REPEAT
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//设置T轴的环绕方式为GL_REPEAT
-	// 设置纹理过滤方式
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//设置缩小过滤方式为GL_LINEAR
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//设置放大过滤方式为GL_LINEAR
+	{
+		std::cout << "Loading Texture" << std::endl; 
+		
+		unsigned int texture;//纹理ID
+		glGenTextures(1, &texture);//生成纹理对象
+		// 这段可以写在循环外面, 因为我们渲染时不会改变纹理, 所以这段代码只需要在渲染循环外执行一次即可(多个纹理也是一样, 除非我们需要在渲染时改变纹理, 这时就需要在渲染循环内执行)
+		glActiveTexture(GL_TEXTURE0);//激活纹理单元, 默认激活的是GL_TEXTURE0, 所以这行代码其实可以省略
+		glBindTexture(GL_TEXTURE_2D, texture);//绑定纹理对象
+		// 设置纹理环绕方式
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//设置S轴的环绕方式为GL_REPEAT
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//设置T轴的环绕方式为GL_REPEAT
+		// 设置纹理过滤方式
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//设置缩小过滤方式为GL_LINEAR
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//设置放大过滤方式为GL_LINEAR
 
-	// 加载纹理图片, 创建纹理, 生成Mipmap
-	int width, height, nrChannels;//图片宽度, 高度, 颜色通道数,这里的width, height, nrChannels是通过stbi_load函数返回的
-	stbi_set_flip_vertically_on_load(true);//翻转图片y轴, 因为OpenGL的坐标原点在窗口左下角, 而图片的坐标原点在左上角
-	//unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);//加载箱子纹理图片
-	unsigned char* data = stbi_load("stone_16.png", &width, &height, &nrChannels, 0);//加载minecraft石头纹理图片
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);//生成纹理, 参数分别为纹理目标, mipmap级别, 纹理存储格式, 宽, 高, 0, 源图格式, 源图数据类型, 图像数据
-		//glGenerateMipmap(GL_TEXTURE_2D);//生成Mipmap
+		// 加载纹理图片, 创建纹理, 生成Mipmap
+		int width, height, nrChannels;//图片宽度, 高度, 颜色通道数,这里的width, height, nrChannels是通过stbi_load函数返回的
+		stbi_set_flip_vertically_on_load(true);//翻转图片y轴, 因为OpenGL的坐标原点在窗口左下角, 而图片的坐标原点在左上角
+		//unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);//加载箱子纹理图片
+		unsigned char* data = stbi_load("stone_16.png", &width, &height, &nrChannels, 0);//加载minecraft石头纹理图片
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);//生成纹理, 参数分别为纹理目标, mipmap级别, 纹理存储格式, 宽, 高, 0, 源图格式, 源图数据类型, 图像数据
+			//glGenerateMipmap(GL_TEXTURE_2D);//生成Mipmap
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+		}
+		stbi_image_free(data);//释放图像内存
+
+
+		ourShader.setInt("ourTexture", 0);//设置纹理单元, 这里的ourTexture对应的是着色器里声明的uniform sampler2D ourTexture, 0表示使用纹理单元GL_TEXTURE0, 当只有一个纹理单元时, 引号内的ourTexture不会影响结果, 但是如果有多个纹理单元时, 这个名字就很重要了
+		//glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);//和上面一行代码功能一样, 设置纹理单元, 上面一行代码是通过着色器类的函数设置, 这行代码是直接通过glUniform1i函数设置, 这里注释掉, 仅供参考
 	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);//释放图像内存
+	// ---- 加载和创建纹理 - END ---- //
+
 
 	// 设置光照方向
-	glm::vec3 lightDirection = glm::vec3(0.35f, 0.6f, 0.10f);
-	lightDirection = glm::normalize(lightDirection);
+	{
+		std::cout << "Setting Light Direction" << std::endl;
 
-	ourShader.use();//使用着色器程序
-	ourShader.setVec3("lightDir", lightDirection);//设置光照方向
-	ourShader.setInt("ourTexture", 0);//设置纹理单元, 这里的ourTexture对应的是着色器里声明的uniform sampler2D ourTexture, 0表示使用纹理单元GL_TEXTURE0, 当只有一个纹理单元时, 引号内的ourTexture不会影响结果, 但是如果有多个纹理单元时, 这个名字就很重要了
-	//glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);//和上面一行代码功能一样, 设置纹理单元, 上面一行代码是通过着色器类的函数设置, 这行代码是直接通过glUniform1i函数设置, 这里注释掉, 仅供参考
-	// ---- 加载和创建纹理 - END ---- //
+		glm::vec3 lightDirection = glm::vec3(0.35f, 0.6f, 0.10f);
+		lightDirection = glm::normalize(lightDirection);
+		ourShader.setVec3("lightDir", lightDirection);//设置光照方向
+	}
 
 	ChunkManager chunkManager(chunkSize);//创建区块管理器对象	
 
 	std::thread chunkUpdateThread(updateChunksThread, std::ref(chunkManager), std::ref(updateChunks));//创建一个线程, 用于更新区块管理器
 	
+	glViewport(ImGui_Width, 0, SCR_WIDTH - ImGui_Width, SCR_HEIGHT); // 右半部分
+
 	while (!glfwWindowShouldClose(window))//循环渲染
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());//获取当前时间
 		deltaTime = currentFrame - lastFrame;//计算时间差
 		lastFrame = currentFrame;//更新上一帧时间
+
+		// input
+		processInput(window);
 
 		// 开始ImGui帧
 		{
@@ -181,28 +207,78 @@ int main()
 				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // 清除标志，启用鼠标
 			}
 
-			ImGui::SetNextWindowPos(ImVec2(5, 5));// 设置窗口位置
-			ImGui::SetNextWindowSize(ImVec2(435, 210));
-			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize);// 创建窗口并显示信息
-
-			// 禁用
+			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);// 创建窗口并显示信息
+			ImGui::SetNextWindowPos(ImVec2(0, 0));// 设置窗口位置
+			ImGui::SetNextWindowSize(ImVec2(float(ImGui_Width),float(SCR_HEIGHT)));
 
 			{
-				ImGui::Text("%.1f FPS (Average %.3f ms/frame)", io.Framerate, 1000.0f / io.Framerate);//显示帧率
-				ImGui::Text("Delta time %.3fms", io.DeltaTime * 1000.0f);//显示每帧时间
-				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//显示相机位置		
-				ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//显示相机所在区块位置
+				ImGui::Text("%.1f FPS", io.Framerate);//显示帧率
+				ImGui::Text("Delta time %.3fms / frame", io.DeltaTime * 1000.0f);//显示每帧时间
+				ImGui::Spacing();
+				ImGui::Separator(); // 添加分隔线
+				ImGui::Spacing();
 			}
 
-			ImGui::Separator(); // 添加分隔线
+			{
+				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//显示相机位置		
+				ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//显示相机所在区块位置
+				ImGui::Text("Chunk Size: %d x 64 x %d", chunkSize, chunkSize);//显示区块大小
+				ImGui::Spacing();
+				ImGui::Separator(); // 添加分隔线
+				ImGui::Spacing();
+			}
 
 			{
-				ImGui::BeginChild("Chunk Manage", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 0是子窗口的高度, true表示子窗口有滚动条
-				// 重置按钮
-				if (ImGui::Button("Reset Chunks and Camera")) {
+				// 修改视野区块距离
+				ImGui::SliderInt("View Distance", &viewDistance, 1, 3);//滑动条, 用于修改视野区块距离
+				ImGui::Spacing();
+				ImGui::Text("Chunk Count: ", chunkManager.getChunks().size());//显示可见区块数量
+				ImGui::Spacing();
+				if (ImGui::Button("Apply View Distance"))//按钮, 用于应用视野区块距离
+				{
+					chunkManager.stopLoading();
+					chunkManager.clearChunks();
+					chunkManager.setViewDistance(viewDistance);
+					chunkManager.startLoading();
+				}
+				ImGui::Spacing();
+				ImGui::Separator(); // 添加分隔线
+				ImGui::Spacing();
+			}
+
+			{
+				static float weight1 = 1.0f;
+				float weight2 = 1.0f - weight1;
+
+				// 修改噪声权重
+				ImGui::SliderFloat("##", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
+				ImGui::Spacing();
+				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
+				ImGui::Text("OpenSimplex2S Weight: %.2f", weight2); // 显示自动计算的 weight2
+				ImGui::Spacing();
+				// 应用噪声设置
+				if (ImGui::Button("Apply Weight And Regenerate Chunks")) {
+					chunkManager.stopLoading();
+					chunkManager.clearChunks();
+					chunkManager.setNoiseWeights(weight1, weight2);
+					chunkManager.clearChunksFolder();//清理chunks文件夹
+					chunkManager.startLoading();
+
+				}
+				ImGui::Spacing();
+				ImGui::Separator(); // 添加分隔线
+				ImGui::Spacing();
+			}
+
+			{
+				// 重置相机位置按钮
+				if (ImGui::Button("Reset Camera")) {
 					chunkManager.clearChunks();
 					camera.Position = originLocation;
 				}
+
+				ImGui::Spacing();
+
 				// 停止加载按钮
 				if (chunkManager.getIsLoading())
 				{
@@ -216,25 +292,26 @@ int main()
 						chunkManager.startLoading();
 					}
 				}
-				ImGui::EndChild();
+				ImGui::Spacing();
+				ImGui::Separator(); // 添加分隔线
+				ImGui::Spacing();
 			}
 
-			ImGui::SameLine(); // 在同一行继续绘制
+			{
+				ImGui::Text("Mouse Control: %s", cameraControlEnabled ? "Enabled" : "Disabled");//鼠标状态	
+				ImGui::Text("Right Mouse Button:Toggle Camera Control");//注明右键切换相机控制
+				ImGui::Spacing();
+				ImGui::Separator(); // 添加分隔线
+				ImGui::Spacing();
+			}
 
 			{
-				ImGui::BeginChild("Noise Weight Settings", ImVec2(200, 100), true);//创建一个子窗口, 200是子窗口的宽度, 100是子窗口的高度, true表示子窗口有滚动条
-				static float weight1 = 1.0f;
-				float weight2 = 1.0f - weight1;
-
-				// 修改噪声权重
-				ImGui::SliderFloat("##", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
-				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
-				ImGui::Text("OpenSimplex2S Weight: %.2f", weight2); // 显示自动计算的 weight2
-				// 应用噪声设置
-				if (ImGui::Button("Apply Weight")) {
-					chunkManager.setNoiseWeights(weight1, weight2);
-				}
-				ImGui::EndChild();
+				ImGui::Text("WASD: Move");//WASD控制移动
+				ImGui::Text("Q/E: Up/Down");//Q/E控制上下
+				ImGui::Text("Space: Toggle Wireframe");//空格键切换线框模式
+				ImGui::Spacing();
+				ImGui::Separator(); // 添加分隔线
+				ImGui::Spacing();
 			}
 
 			// 打印当前imgui窗口的大小
@@ -242,15 +319,10 @@ int main()
 			//ImGui::Text("Window Size: (%.0f, %.0f)", windowSize.x, windowSize.y);
 
 			ImGui::End();
-		}		
+		}
 		
 		// 更新相机位置
 		glm::vec3 cameraPosition = camera.Position;
-		// 更新区块管理器
-		//chunkManager.update(cameraPosition);
-
-		// input
-		processInput(window);
 		
 		// render
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //设置清空屏幕所用的颜色为深蓝色
@@ -264,7 +336,7 @@ int main()
 		glm::mat4 view = camera.GetViewMatrix();//获取观察矩阵
 		ourShader.setMat4("view", view);//设置观察矩阵
 		// 传递投影矩阵给着色器
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);//透视投影
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)(SCR_WIDTH - ImGui_Width)/ (float)SCR_HEIGHT, 0.1f, 100.0f);//透视投影
 		ourShader.setMat4("projection", projection);//设置投影矩阵
 
 		glm::mat4 projectionViewMatrix = projection * view;//投影矩阵 * 观察矩阵 = 投影观察矩阵
@@ -272,8 +344,6 @@ int main()
 		frustum.calculateFrustum(projectionViewMatrix);
 
 		//glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
-
-		//std::lock_guard<std::mutex> lock(chunkManagerMutex); // 加锁
 
 		// 渲染当前加载的区块
 		for (const auto& chunkPair : chunkManager.getChunks()) {
@@ -322,8 +392,6 @@ int main()
 		// 渲染GUI
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		//glBindVertexArray(0);//解绑VAO对象(不是必须的)
 
 		// glfw: 交换缓冲区和轮询IO事件(键盘输入, 鼠标移动等)
 		glfwSwapBuffers(window);
@@ -433,7 +501,9 @@ void processInput(GLFWwindow* window)
 // 当窗口大小改变时调用该函数
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	glViewport(0, 0, width, height);//设置视口大小
+	SCR_HEIGHT = height;
+	SCR_WIDTH = width;
+	glViewport(ImGui_Width , 0, SCR_WIDTH - ImGui_Width, SCR_HEIGHT);//设置视口大小
 }
 
 

@@ -3,7 +3,7 @@
 // 构造函数，初始化区块大小
 ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
-    //std::cout << "-------------- Initialize --------------" << std::endl;
+    std::cout << "Initializing Origin Chunks" << std::endl;
 
 	// 保存最后一帧的摄像机位置
 	lastCameraPosition = glm::vec3(0.0f);
@@ -22,8 +22,8 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
     noise1.SetSeed(SEED);
 
     //noise2.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    //noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+    //noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise2.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     noise2.SetFrequency(0.1f);
     noise2.SetSeed(SEED);
 
@@ -44,12 +44,12 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
             //这里的.find()函数是在unordered_map中查找键值为key的元素，如果找到了就返回指向该元素的迭代器，否则返回unordered_map::end()函数返回的迭代器
             if (chunks.find(key) == chunks.end()) {
-                auto start = std::chrono::high_resolution_clock::now();// 计时开始
+                //auto start = std::chrono::high_resolution_clock::now();// 计时开始
                 // 如果区块未被加载，则调用loadChunk加载区块
                 loadChunk(chunkPos);
-                auto end = std::chrono::high_resolution_clock::now(); //记录结束时间
-                std::chrono::duration<double> generationTime = end - start;
-                std::cout << "Chunk generated " << key << " in " << generationTime.count() << " seconds." << std::endl;
+                //auto end = std::chrono::high_resolution_clock::now(); //记录结束时间
+                //std::chrono::duration<double> generationTime = end - start;
+                //std::cout << "Chunk generated " << key << " in " << generationTime.count() << " seconds." << std::endl;
             }
             //  临时存储需要保留的区块
             tempChunks[key] = chunks[key];
@@ -76,9 +76,21 @@ void ChunkManager::setNoiseWeights(float weight1, float weight2) {
     this->weight2 = weight2;
 }
 
+void ChunkManager::setViewDistance(int distance)
+{
+	viewDistance = distance;
+}
+
 bool ChunkManager::getIsLoading() const
 {
     return isLoading;
+}
+
+void ChunkManager::clearChunksFolder()
+{
+	std::filesystem::remove_all("chunks");
+	std::filesystem::create_directory("chunks");
+	//std::cout << "Cleared all chunks in the folder." << std::endl;
 }
 
 std::unordered_map<std::string, Chunk>& ChunkManager::getChunks()
@@ -104,10 +116,10 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
         floor(cameraPosition.z / chunkSize)
     );
 
-    // 如果摄像机位置没有改变，则不需要更新区块
-    if (cameraChunkPosition == lastCameraPosition) {
-        return;
-    }
+    // 如果摄像机位置没有改变且区块数量为0，则不需要更新区块
+	if (cameraChunkPosition == lastCameraPosition && chunks.size() != 0) {
+		return;
+	}
 
 	// 清除内存中的区块数据
 	//chunks.clear();

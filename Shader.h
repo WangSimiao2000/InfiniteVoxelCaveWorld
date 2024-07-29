@@ -15,6 +15,7 @@ public:
 	// 构造器读取并构建着色器
     Shader(const char* vertexPath, const char* fragmentPath)
     {
+		std::cout << "Loading Vertex And Fragment Shaders" << std::endl;
         // 1. retrieve the vertex/fragment source code from filePath
 		// 1. 从文件路径中检索顶点/片段着色器的源代码
         std::string vertexCode;
