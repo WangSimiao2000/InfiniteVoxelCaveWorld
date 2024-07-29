@@ -31,10 +31,10 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);//鼠标回调函数
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);//滚轮回调函数
 
-unsigned int SCR_WIDTH = 1200;
+unsigned int SCR_WIDTH = 1180;
 unsigned int SCR_HEIGHT = 600;
 
-const unsigned int ImGui_Width = 300;
+const unsigned int ImGui_Width = 280;
 
 glm::vec3 originLocation = glm::vec3(8.0f, 58.0f, 8.0f); // 原点位置: 在原始的9x9区块中心上方
 //glm::vec3 originLocation = glm::vec3(50.0f, 58.0f, 74.0f); // 原点位置: 远距离观察整个初始9x9区块
@@ -207,9 +207,9 @@ int main()
 				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // 清除标志，启用鼠标
 			}
 
-			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);// 创建窗口并显示信息
 			ImGui::SetNextWindowPos(ImVec2(0, 0));// 设置窗口位置
-			ImGui::SetNextWindowSize(ImVec2(float(ImGui_Width),float(SCR_HEIGHT)));
+			ImGui::SetNextWindowSize(ImVec2(float(ImGui_Width), float(SCR_HEIGHT))); // 设置窗口大小
+			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);// 创建窗口并显示信息
 
 			{
 				ImGui::Text("%.1f FPS", io.Framerate);//显示帧率
@@ -230,8 +230,9 @@ int main()
 
 			{
 				// 修改视野区块距离
-				ImGui::SliderInt("View Distance", &viewDistance, 1, 3);//滑动条, 用于修改视野区块距离
+				ImGui::SliderInt("##View Distance", &viewDistance, 1, 3);//滑动条, 用于修改视野区块距离
 				ImGui::Spacing();
+				ImGui::Text("View Distance: %d", viewDistance);//显示视野区块距离
 				ImGui::Text("Chunk Count: ", chunkManager.getChunks().size());//显示可见区块数量
 				ImGui::Spacing();
 				if (ImGui::Button("Apply View Distance"))//按钮, 用于应用视野区块距离
@@ -251,13 +252,13 @@ int main()
 				float weight2 = 1.0f - weight1;
 
 				// 修改噪声权重
-				ImGui::SliderFloat("##", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
+				ImGui::SliderFloat("##Noise Weight", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
 				ImGui::Spacing();
 				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
 				ImGui::Text("OpenSimplex2S Weight: %.2f", weight2); // 显示自动计算的 weight2
 				ImGui::Spacing();
 				// 应用噪声设置
-				if (ImGui::Button("Apply Weight And Regenerate Chunks")) {
+				if (ImGui::Button("Apply Noise Weight")) {
 					chunkManager.stopLoading();
 					chunkManager.clearChunks();
 					chunkManager.setNoiseWeights(weight1, weight2);
@@ -299,16 +300,18 @@ int main()
 
 			{
 				ImGui::Text("Mouse Control: %s", cameraControlEnabled ? "Enabled" : "Disabled");//鼠标状态	
-				ImGui::Text("Right Mouse Button:Toggle Camera Control");//注明右键切换相机控制
 				ImGui::Spacing();
 				ImGui::Separator(); // 添加分隔线
 				ImGui::Spacing();
 			}
 
 			{
+				ImGui::Text("Right Mouse Button:Toggle Control");//注明右键切换相机控制
 				ImGui::Text("WASD: Move");//WASD控制移动
 				ImGui::Text("Q/E: Up/Down");//Q/E控制上下
 				ImGui::Text("Space: Toggle Wireframe");//空格键切换线框模式
+				ImGui::Text("Mouse Scroll: Zoom");//鼠标滚轮控制缩放
+				ImGui::Text("ESC: Close Window");//ESC关闭窗口
 				ImGui::Spacing();
 				ImGui::Separator(); // 添加分隔线
 				ImGui::Spacing();
