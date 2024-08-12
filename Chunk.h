@@ -8,6 +8,7 @@
 #include "FastNoiseLite.h"
 
 // 面的枚举类型
+// Enum type of faces
 enum Face {
     FRONT_FACE,
     BACK_FACE,
@@ -18,6 +19,7 @@ enum Face {
 };
 
 // 顶点结构体
+// Vertex structure
 struct Vertex {
 	glm::vec3 position;
 	glm::vec2 texCoords;
@@ -44,7 +46,7 @@ private:
     int chunkWidthSize;
 	int chunkHeight = 64;
     std::vector<glm::vec3> voxelPositions;
-	glm::vec3 position;// 区块的位置(世界坐标)
+	glm::vec3 position;// The position of the chunk (world coordinates)
     std::vector<std::vector<std::vector<bool>>> chunkBlocks;
     std::vector<std::pair<glm::vec3, Face>> visibleFaces;
     std::vector<Vertex> chunkVisibleFacesVertices;

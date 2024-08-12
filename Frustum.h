@@ -8,6 +8,7 @@
 class Frustum {
 public:
     // 计算视锥体平面
+    // Calculate frustum planes
     void calculateFrustum(const glm::mat4& projectionViewMatrix) {
         planes[0] = glm::vec4(projectionViewMatrix[0][3] + projectionViewMatrix[0][0], // Left
             projectionViewMatrix[1][3] + projectionViewMatrix[1][0],
@@ -41,6 +42,7 @@ public:
     }
 
     // 检查点是否在视锥体内
+	// Check if a point is inside the frustum
     bool isPointInFrustum(const glm::vec3& point) const {
         for (int i = 0; i < 6; i++) {
             if (glm::dot(glm::vec3(planes[i]), point) + planes[i].w <= 0) {
@@ -57,6 +59,7 @@ public:
     }
 
     // 检查AABB是否在视锥体内, 这里的AABB表示一个立方体，由最小点和最大点确定
+	// Check if an AABB is inside the frustum. Here, AABB represents a cube, determined by the minimum and maximum points   
     bool isAABBInFrustum(const glm::vec3& min, const glm::vec3& max) const {
         for (int i = 0; i < 6; i++) {
             glm::vec3 p = min;

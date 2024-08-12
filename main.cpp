@@ -65,6 +65,7 @@ int viewDistance = 2;//视野区块距离
 
 static void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& running) {
 	// 更新区块管理器
+	// Update the chunk manager
 	while (running)
 	{
 		chunkManager.update(camera.Position); // 更新区块管理器
@@ -97,6 +98,7 @@ int main()
 
 
 	// 告诉GLFW我们想要捕捉所有的鼠标输入
+	// Tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))//初始化GLAD
@@ -106,20 +108,24 @@ int main()
 	}
 
 	// 输出OpenGL版本,显卡型号等信息
+	// Output OpenGL version, graphics card model and other information
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;//输出OpenGL版本
 	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;//输出显卡型号
 	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;//输出显卡厂商	
 
 	// 开启深度测试
+	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
 	// 开启面剔除
+	// Enable face culling
 	glEnable(GL_CULL_FACE);
 
 	Shader ourShader("shaders/VertexShader.vert", "shaders/FragmentShader.frag");//创建着色器对象
 	ourShader.use();//使用着色器程序
 
 	// 初始化ImGui
+	// Setup Dear ImGui context
 	std::cout << "Initializing ImGui" << std::endl;
 
 	IMGUI_CHECKVERSION();
@@ -127,10 +133,12 @@ int main()
 	ImGuiIO& io = ImGui::GetIO();
 
 	// 设置平台/渲染器绑定
+	// Setup Platform/Renderer bindings
 	ImGui_ImplGlfw_InitForOpenGL(window, true);          // 第二个参数是是否捕捉鼠标, 这里的YOUR_WINDOW是你的GLFW窗口,应该改成你的窗口变量名
 	ImGui_ImplOpenGL3_Init();
 
 	// ---- 加载和创建纹理 - START ---- //
+	// ---- Load and create a texture - START ---- //
 	{
 		std::cout << "Loading Texture" << std::endl; 
 		
@@ -167,9 +175,11 @@ int main()
 		//glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);//和上面一行代码功能一样, 设置纹理单元, 上面一行代码是通过着色器类的函数设置, 这行代码是直接通过glUniform1i函数设置, 这里注释掉, 仅供参考
 	}
 	// ---- 加载和创建纹理 - END ---- //
+	// ---- Load and create a texture - END ---- //
 
 
 	// 设置光照方向
+	// Set light direction
 	{
 		std::cout << "Setting Light Direction" << std::endl;
 
@@ -194,12 +204,14 @@ int main()
 		processInput(window);
 
 		// 开始ImGui帧
+		// Start the ImGui frame
 		{
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
 			// 根据需要启用或禁用Dear ImGui对鼠标的绑定
+			// Enable or disable Dear ImGui binding to the mouse as needed
 			if (cameraControlEnabled) {
 				io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // 设置标志，禁用鼠标
 			}
@@ -230,6 +242,7 @@ int main()
 
 			{
 				// 修改视野区块距离
+				// Modify the view distance
 				ImGui::SliderInt("##View Distance", &viewDistance, 1, 3);//滑动条, 用于修改视野区块距离
 				ImGui::Spacing();
 				ImGui::Text("View Distance: %d", viewDistance);//显示视野区块距离
@@ -252,12 +265,14 @@ int main()
 				float weight2 = 1.0f - weight1;
 
 				// 修改噪声权重
+				// Modify noise weights
 				ImGui::SliderFloat("##Noise Weight", &weight1, 0.0f, 1.0f); // 使用##去掉滑动条标签
 				ImGui::Spacing();
 				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // 显示手动设置的 weight1
 				ImGui::Text("OpenSimplex2S Weight: %.2f", weight2); // 显示自动计算的 weight2
 				ImGui::Spacing();
 				// 应用噪声设置
+				// Apply noise settings
 				if (ImGui::Button("Apply Noise Weight")) {
 					chunkManager.stopLoading();
 					chunkManager.clearChunks();
@@ -273,6 +288,7 @@ int main()
 
 			{
 				// 重置相机位置按钮
+				// Reset camera position button
 				if (ImGui::Button("Reset Camera")) {
 					chunkManager.clearChunks();
 					camera.Position = originLocation;
@@ -281,6 +297,7 @@ int main()
 				ImGui::Spacing();
 
 				// 停止加载按钮
+				// Stop loading button
 				if (chunkManager.getIsLoading())
 				{
 					if (ImGui::Button("Stop Loading Chunks")) {
@@ -325,6 +342,7 @@ int main()
 		}
 		
 		// 更新相机位置
+		// Update camera position
 		glm::vec3 cameraPosition = camera.Position;
 		
 		// render
@@ -336,9 +354,11 @@ int main()
 		ourShader.setVec3("viewPos", cameraPosition); // 将相机位置传递给着色器
 
 		// 相机/观察矩阵
+		// Camera/View transformation
 		glm::mat4 view = camera.GetViewMatrix();//获取观察矩阵
 		ourShader.setMat4("view", view);//设置观察矩阵
 		// 传递投影矩阵给着色器
+		// Projection matrix
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)(SCR_WIDTH - ImGui_Width)/ (float)SCR_HEIGHT, 0.1f, 100.0f);//透视投影
 		ourShader.setMat4("projection", projection);//设置投影矩阵
 
@@ -349,6 +369,7 @@ int main()
 		//glBindVertexArray(VAO);//绑定VAO对象(只有一个VAO对象时不是必须的,但是我们还是绑定它,以养成好习惯)
 
 		// 渲染当前加载的区块
+		// Render currently loaded chunks
 		for (const auto& chunkPair : chunkManager.getChunks()) {
 			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
 			
@@ -393,15 +414,18 @@ int main()
 		}
 
 		// 渲染GUI
+		// Render GUI
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// glfw: 交换缓冲区和轮询IO事件(键盘输入, 鼠标移动等)
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	// 终止更新线程
+	// Terminate the update thread
 	updateChunks = false;
 	chunkUpdateThread.join();
 
@@ -410,17 +434,20 @@ int main()
 	glDeleteBuffers(1, &VBO);*/
 
 	// 渲染结束后清理ImGui
+	// Cleanup ImGui
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
 	// 清理所有之前分配的GLFW资源
+	// glfw: terminate, clearing all previously allocated GLFW resources.
 	glfwTerminate();
 	return 0;
 }
 
 
 // 处理输入
+// Process input
 void processInput(GLFWwindow* window)
 {
 	//按下ESC键关闭窗口
@@ -502,6 +529,7 @@ void processInput(GLFWwindow* window)
 
 
 // 当窗口大小改变时调用该函数
+// Callback function when the window size changes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	SCR_HEIGHT = height;
@@ -511,6 +539,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 
 // 鼠标回调函数: 鼠标移动时调用
+// Mouse callback function: called when the mouse moves
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
 	if (cameraControlEnabled) {
@@ -536,6 +565,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
 
 // 滚轮回调函数: 鼠标滚轮滚动时调用
+// Scroll callback function: called when the mouse wheel is scrolled
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));

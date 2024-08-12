@@ -1,6 +1,7 @@
 #include "Chunk.h"
 
 // 单个体素的顶点数据
+// Vertex data for a single voxel
 extern std::vector<Vertex> voxelVertices = {
     // Front face
     {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
@@ -47,6 +48,7 @@ extern std::vector<Vertex> voxelVertices = {
 };
 
 // 初始化区块的边长和位置; 分配三维布尔数组的内存, 表示每个体素是否被填充; 初始化梯度向量数组
+// Initialize the size and position of the chunk; Allocate memory for the three-dimensional boolean array, indicating whether each voxel is filled; Initialize the gradient vector array
 Chunk::Chunk(int size, const glm::vec3& position)
     : chunkWidthSize(size), position(position)
 {
@@ -57,10 +59,12 @@ Chunk::Chunk(int size, const glm::vec3& position)
 }
 
 // 默认构造函数，初始化区块大小为16，位置为原点
+// Default constructor, initialize the size of the chunk to 16 and the position to the origin
 Chunk::Chunk()
     :   Chunk(16, glm::vec3(0.0f)) {}
 
 // 析构函数，释放VAO和VBO, 会在对象销毁时调用, 有参数的构造函数在对象销毁时也会调用
+// Destructor, release VAO and VBO, will be called when the object is destroyed, and the constructor with parameters will also be called when the object is destroyed
 Chunk::~Chunk()
 {
 }
@@ -99,7 +103,9 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
 
 			for (int y = 0; y < terrainHeight - 16; ++y) {//-16是为了避免地形太低，导致地形下方生成洞穴
                 // 如果当前位置在地形高度以下
+				// If the current position is below the terrain height
                 // 判断是否生成洞穴
+				// Determine whether to generate a cave
                 float frequency = 0.7f;
                 float caveNoise1 = noise1.GetNoise((position.x + x) * frequency, (position.y + y) * frequency, (position.z + z) * frequency);
                 float caveNoise2 = noise2.GetNoise((position.x + x) * frequency, (position.y + y) * frequency, (position.z + z) * frequency);
@@ -116,6 +122,7 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
 }
 
 // 获取体素的世界坐标(世界坐标 = 区块坐标 + 体素坐标)
+// Get the world coordinates of the voxel (world coordinates = chunk coordinates + voxel coordinates)
 std::vector<glm::vec3> Chunk::getVoxelWorldPositions() const {
     std::vector<glm::vec3> worldPositions;
     for (const auto& pos : voxelPositions) {
@@ -125,6 +132,7 @@ std::vector<glm::vec3> Chunk::getVoxelWorldPositions() const {
 }
 
 // 将可见面添加到visibleFaces数组中
+// Add visible faces to the visibleFaces array
 void Chunk::generateVisibleFaces() {
     visibleFaces.clear();
     for (int x = 0; x < chunkWidthSize; ++x) {
@@ -195,6 +203,7 @@ glm::vec3 Chunk::getChunkPosition() const
 }
 
 // 判断坐标(x, y, z)处是否有体素
+// Determine if there is a voxel at the coordinate (x, y, z)
 bool Chunk::isVoxelAt(int x, int y, int z) const {
     if (x >= 0 && x < chunkWidthSize && y >= 0 && y < chunkHeight && z >= 0 && z < chunkWidthSize) {
         return chunkBlocks[x][y][z];
@@ -203,6 +212,7 @@ bool Chunk::isVoxelAt(int x, int y, int z) const {
 }
 
 // 添加体素到区块中,当体素的坐标在区块范围内时，将体素的坐标添加到voxelPositions数组中, 用于后续渲染
+// Add voxels to the chunk. When the voxel coordinates are within the chunk range, add the voxel coordinates to the voxelPositions array for subsequent rendering
 void Chunk::addVoxel(const glm::vec3& pos) {
     int x = static_cast<int>(pos.x);
     int y = static_cast<int>(pos.y);
@@ -215,16 +225,19 @@ void Chunk::addVoxel(const glm::vec3& pos) {
 }
 
 // 获取chunkBlocks: 三维布尔数组，表示每个体素是否被填充
+// Get chunkBlocks: a three-dimensional boolean array indicating whether each voxel is filled
 const std::vector<std::vector<std::vector<bool>>>& Chunk::getChunkBlocks() const {
     return chunkBlocks;
 }
 
 // 获取voxelPositions: 体素的相对坐标的数组
+// Get voxelPositions: an array of relative voxel coordinates
 const std::vector<glm::vec3>& Chunk::getVoxelPositions() const {
     return voxelPositions;
 }
 
 // 获取区块中的可见面
+// Get the visible faces in the chunk
 std::vector<std::pair<glm::vec3, Face>> Chunk::getVisibleFaces() const {
     return visibleFaces;
 }
