@@ -32,8 +32,8 @@ Simply clone the repository and double-click the .sln file to open it with Visua
 
 ## Contact Information
 
-Email: mickeymiao2023@163.com
-WeChat: SiMiao1106
+- Email: mickeymiao2023@163.com
+- WeChat: SiMiao1106
 
 # 程序化生成体素洞穴地形
 
@@ -69,5 +69,5 @@ WeChat: SiMiao1106
 
 ## 联系方式
 
-邮箱: mickeymiao2023@163.com
-微信: SiMiao1106
+- 邮箱: mickeymiao2023@163.com
+- 微信: SiMiao1106
