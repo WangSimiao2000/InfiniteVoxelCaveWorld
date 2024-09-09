@@ -1,4 +1,5 @@
-# Procedural Generation of Infinite Voxel Cave Terrain 程序化生成体素洞穴地形
+# Procedural Generation of Infinite Voxel Cave Terrain
+# 程序化生成体素洞穴地形
 
 ## Introduce 简介
 
