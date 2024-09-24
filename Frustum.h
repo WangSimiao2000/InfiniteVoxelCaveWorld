@@ -9,6 +9,9 @@ class Frustum {
 public:
     // 计算视锥体平面
     // Calculate frustum planes
+    // 平面的表示: ax + by + cz + d = 0
+    // vec4的前三个分量表示平面的法向量，第四个分量表示平面的距离
+    // [a, b, c, d] = [normal, distance]
     void calculateFrustum(const glm::mat4& projectionViewMatrix) {
         planes[0] = glm::vec4(projectionViewMatrix[0][3] + projectionViewMatrix[0][0], // Left
             projectionViewMatrix[1][3] + projectionViewMatrix[1][0],
