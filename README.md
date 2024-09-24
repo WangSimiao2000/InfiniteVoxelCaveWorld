@@ -25,7 +25,7 @@ This is a Windows-based project for procedurally generating voxel caves. It prim
   - 视锥体剔除: 仅渲染在视野范围内的区块，提高渲染性能。
   - 多线程处理: 渲染与生成逻辑分离，实现生成和渲染的并行处理。
 
-## 重点功能实现总结
+## Key Features Implementation Summary 重点功能实现总结
 
 ### 1. 噪声地形区块生成
 
