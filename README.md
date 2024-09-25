@@ -25,6 +25,25 @@ This is a Windows-based project for procedurally generating voxel caves. It prim
   - 视锥体剔除: 仅渲染在视野范围内的区块，提高渲染性能。
   - 多线程处理: 渲染与生成逻辑分离，实现生成和渲染的并行处理。
 
+## Installation and Usage 安装与使用
+
+### System Requirements 系统需求
+
+ - Windows
+ - OpenGL3.0+
+ - Visual Studio 2022
+
+## Installation Steps 安装步骤
+
+Simply clone the repository and double-click the .sln file to open it with Visual Studio.
+
+直接克隆仓库并双击sln使用VisualStudio打开即可
+
+## Screenshot 示例截图
+
+![cave_overview](cave_overview.png)
+
+
 ## Key Features Implementation Summary 重点功能实现总结
 
 ### 1. 噪声地形区块生成
@@ -145,23 +164,6 @@ glBindBuffer(GL_ARRAY_BUFFER, VBO);
 glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 ```
 
-## Installation and Usage 安装与使用
-
-### System Requirements 系统需求
-
- - Windows
- - OpenGL3.0+
- - Visual Studio 2022
-
-## Installation Steps 安装步骤
-
-Simply clone the repository and double-click the .sln file to open it with Visual Studio.
-
-直接克隆仓库并双击sln使用VisualStudio打开即可
-
-## Screenshot 示例截图
-
-![cave_overview](cave_overview.png)
 
 ## Contact Information 联系方式
 
