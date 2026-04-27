@@ -380,9 +380,14 @@ int main()
 
 		// 渲染当前加载的区块
 		// Render currently loaded chunks
-		for (const auto& chunkPair : chunkManager.getChunks()) {
-			const Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
+		for (auto& chunkPair : chunkManager.getChunks()) {
+			Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
 			
+			// 如果还没上传到 GPU，先上传
+			if (!chunk.hasGPUData()) {
+				chunk.uploadToGPU();
+			}
+
 			// 通过可见区块渲染体素
 			if (frustum.isAABBInFrustum(chunk.getMinBounds(), chunk.getMaxBounds()))
 			//if (true)
@@ -391,35 +396,7 @@ int main()
 				model = glm::translate(model, chunk.getChunkPosition());
 				ourShader.setMat4("model", model); // 设置模型矩阵
 
-				const auto& vertices = chunk.getChunkVisibleFacesVertices();
-
-				unsigned int VAO, VBO;//VAO是顶点数组对象, VBO是顶点缓冲对象
-				glGenVertexArrays(1, &VAO);
-				glGenBuffers(1, &VBO);
-
-				glBindVertexArray(VAO);
-
-				glBindBuffer(GL_ARRAY_BUFFER, VBO);
-				glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-
-				// 设置顶点位置属性
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-				glEnableVertexAttribArray(0);
-
-				// 设置纹理坐标属性
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
-				glEnableVertexAttribArray(1);
-
-				// 绘制顶点数据
-				glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size()));
-
-				// 解绑 VAO 和 VBO
-				glBindVertexArray(0);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-				// 删除 VAO 和 VBO, 释放资源, 避免内存泄漏
-				glDeleteVertexArrays(1, &VAO);
-				glDeleteBuffers(1, &VBO);
+				chunk.draw();
 			}
 		}
 

@@ -29,6 +29,13 @@ public:
     Chunk(int size, const glm::vec3& position);
     ~Chunk();
 
+    // 禁止拷贝（持有 GPU 资源）
+    Chunk(const Chunk&) = delete;
+    Chunk& operator=(const Chunk&) = delete;
+    // 允许移动
+    Chunk(Chunk&& other) noexcept;
+    Chunk& operator=(Chunk&& other) noexcept;
+
     void initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float weight1, float weight2, float THRESHOLD);
     std::vector<std::pair<glm::vec3, Face>> getVisibleFaces() const;
     std::vector<glm::vec3> getVoxelWorldPositions() const;
@@ -38,8 +45,12 @@ public:
     void generateVisibleFaces();
 	glm::vec3 getMaxBounds() const;
 	glm::vec3 getMinBounds() const;
-	std::vector<Vertex> getChunkVisibleFacesVertices() const;
+	const std::vector<Vertex>& getChunkVisibleFacesVertices() const;
 	glm::vec3 getChunkPosition() const;
+
+    void uploadToGPU();
+    void draw() const;
+    bool hasGPUData() const { return VAO != 0; }
 
 private:
     int chunkWidthSize;
@@ -50,6 +61,10 @@ private:
     std::vector<std::pair<glm::vec3, Face>> visibleFaces;
     std::vector<Vertex> chunkVisibleFacesVertices;
     bool isVoxelAt(int x, int y, int z) const;
+
+    GLuint VAO = 0;
+    GLuint VBO = 0;
+    GLsizei vertexCount = 0;
 };
 
 #endif // CHUNK_H

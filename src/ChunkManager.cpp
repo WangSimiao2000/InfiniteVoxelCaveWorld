@@ -62,13 +62,13 @@ ChunkManager::ChunkManager(int chunkSize, const std::string& baseDir) : chunkSiz
             }
             //  临时存储需要保留的区块
 			// Temporary storage for chunks to be retained
-            tempChunks.insert_or_assign(key, chunks.at(key));
+            tempChunks.insert_or_assign(key, std::move(chunks.at(key)));
         }
     }
 
     // 更新chunks成员变量
 	// Update the chunks member variable
-    chunks = tempChunks;
+    chunks = std::move(tempChunks);
 }
 
 // 根据区块的位置生成一个唯一的字符串键，用于标识区块
@@ -167,14 +167,14 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
                 //std::cout << "Chunk generated " << key <<" in " << generationTime.count() << " seconds." << std::endl;
             }
             //  临时存储需要保留的区块
-            tempChunks.insert_or_assign(key, chunks.at(key));
+            tempChunks.insert_or_assign(key, std::move(chunks.at(key)));
         }
     }
     
     // 更新chunks成员变量
     {
         std::lock_guard<std::mutex> lock(chunksMutex);
-        chunks = tempChunks;
+        chunks = std::move(tempChunks);
     }
 }
 

@@ -58,10 +58,76 @@ Chunk::Chunk(int size, const glm::vec3& position)
 	voxelPositions.reserve(size * chunkHeight * size);
 }
 
-// 析构函数，释放VAO和VBO, 会在对象销毁时调用, 有参数的构造函数在对象销毁时也会调用
-// Destructor, release VAO and VBO, will be called when the object is destroyed, and the constructor with parameters will also be called when the object is destroyed
+// 析构函数，释放VAO和VBO
+// Destructor, release VAO and VBO
 Chunk::~Chunk()
 {
+    if (VAO) { glDeleteVertexArrays(1, &VAO); }
+    if (VBO) { glDeleteBuffers(1, &VBO); }
+}
+
+// 移动构造函数
+Chunk::Chunk(Chunk&& other) noexcept
+    : chunkWidthSize(other.chunkWidthSize), chunkHeight(other.chunkHeight),
+      voxelPositions(std::move(other.voxelPositions)), position(other.position),
+      chunkBlocks(std::move(other.chunkBlocks)), visibleFaces(std::move(other.visibleFaces)),
+      chunkVisibleFacesVertices(std::move(other.chunkVisibleFacesVertices)),
+      VAO(other.VAO), VBO(other.VBO), vertexCount(other.vertexCount)
+{
+    other.VAO = 0;
+    other.VBO = 0;
+    other.vertexCount = 0;
+}
+
+// 移动赋值运算符
+Chunk& Chunk::operator=(Chunk&& other) noexcept
+{
+    if (this != &other) {
+        if (VAO) { glDeleteVertexArrays(1, &VAO); }
+        if (VBO) { glDeleteBuffers(1, &VBO); }
+        chunkWidthSize = other.chunkWidthSize;
+        chunkHeight = other.chunkHeight;
+        voxelPositions = std::move(other.voxelPositions);
+        position = other.position;
+        chunkBlocks = std::move(other.chunkBlocks);
+        visibleFaces = std::move(other.visibleFaces);
+        chunkVisibleFacesVertices = std::move(other.chunkVisibleFacesVertices);
+        VAO = other.VAO; VBO = other.VBO; vertexCount = other.vertexCount;
+        other.VAO = 0; other.VBO = 0; other.vertexCount = 0;
+    }
+    return *this;
+}
+
+// 上传顶点数据到 GPU（只调用一次）
+void Chunk::uploadToGPU()
+{
+    if (chunkVisibleFacesVertices.empty()) return;
+    if (VAO) { glDeleteVertexArrays(1, &VAO); VAO = 0; }
+    if (VBO) { glDeleteBuffers(1, &VBO); VBO = 0; }
+
+    vertexCount = static_cast<GLsizei>(chunkVisibleFacesVertices.size());
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), chunkVisibleFacesVertices.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+}
+
+// 绘制（渲染循环中调用）
+void Chunk::draw() const
+{
+    if (VAO == 0 || vertexCount == 0) return;
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    glBindVertexArray(0);
 }
 
 // 初始化区块
@@ -187,7 +253,7 @@ glm::vec3 Chunk::getMinBounds() const
     return position;
 }
 
-std::vector<Vertex> Chunk::getChunkVisibleFacesVertices() const
+const std::vector<Vertex>& Chunk::getChunkVisibleFacesVertices() const
 {
 	return chunkVisibleFacesVertices;
 }
