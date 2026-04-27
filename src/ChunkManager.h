@@ -10,6 +10,7 @@
 #include <mutex>
 #include <atomic>
 #include <functional>
+#include <memory>
 #include "Chunk.h"
 
 class ChunkManager {
@@ -41,7 +42,7 @@ private:
     float THRESHOLD = 0.3f; // Threshold value
     int SEED = 1234; // Random seed
     std::atomic<bool> isLoading{false}; // Flag indicating whether chunks are being loaded
-    std::unordered_map<std::string, Chunk> chunks;
+    std::unordered_map<std::string, std::shared_ptr<Chunk>> chunks;
     int viewDistance = 2;
 
     std::string getChunkKey(const glm::vec3& position);
