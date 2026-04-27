@@ -403,3 +403,13 @@ FodyWeavers.xsd
 # CMake
 build/
 CMakeUserPresets.json
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# ImGui runtime config
+imgui.ini
+
+# Runtime generated chunk data
+chunks/
