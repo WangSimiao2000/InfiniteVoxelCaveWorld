@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <iostream>
 #include <mutex>
+#include <atomic>
+#include <functional>
 #include "Chunk.h"
 
 class ChunkManager {
@@ -21,7 +23,11 @@ public:
     void setViewDistance(int distance); // Set view distance
     void clearChunksFolder(); // Clear the chunks folder
     bool getIsLoading() const;
-    std::unordered_map<std::string, Chunk>& getChunks();
+    size_t getChunkCount();
+
+    // 在锁内遍历所有区块，回调函数中可安全访问 Chunk
+    // Iterate all chunks under lock, callback can safely access Chunk
+    void forEachChunk(const std::function<void(const std::string&, Chunk&)>& fn);
 
 private:
     std::mutex chunksMutex; // Mutex lock
@@ -34,9 +40,9 @@ private:
     float weight2 = 0.0f; // Weight for the second noise
     float THRESHOLD = 0.3f; // Threshold value
     int SEED = 1234; // Random seed
-    bool isLoading = false; // Flag indicating whether chunks are being loaded
+    std::atomic<bool> isLoading{false}; // Flag indicating whether chunks are being loaded
     std::unordered_map<std::string, Chunk> chunks;
-    int viewDistance = 2; // View distance, measured in chunks, with the camera at the center of a square region. The side length is 2*2+1, including the current chunk plus two chunks extending in each direction
+    int viewDistance = 2;
 
     std::string getChunkKey(const glm::vec3& position);
     void loadChunk(const glm::vec3& position);

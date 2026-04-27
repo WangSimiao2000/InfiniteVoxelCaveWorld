@@ -105,10 +105,18 @@ void ChunkManager::clearChunksFolder()
 	//std::cout << "Cleared all chunks in the folder." << std::endl;
 }
 
-std::unordered_map<std::string, Chunk>& ChunkManager::getChunks()
+void ChunkManager::forEachChunk(const std::function<void(const std::string&, Chunk&)>& fn)
 {
     std::lock_guard<std::mutex> lock(chunksMutex);
-	return chunks;
+    for (auto& pair : chunks) {
+        fn(pair.first, pair.second);
+    }
+}
+
+size_t ChunkManager::getChunkCount()
+{
+    std::lock_guard<std::mutex> lock(chunksMutex);
+    return chunks.size();
 }
 
 // 更新当前加载的区块

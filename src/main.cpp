@@ -256,7 +256,7 @@ int main()
 				ImGui::SliderInt("##View Distance", &viewDistance, 1, 3);//滑动条, 用于修改视野区块距离
 				ImGui::Spacing();
 				ImGui::Text("View Distance: %d", viewDistance);//显示视野区块距离
-				ImGui::Text("Chunk Count: %zu", chunkManager.getChunks().size());//显示可见区块数量
+				ImGui::Text("Chunk Count: %zu", chunkManager.getChunkCount());//显示可见区块数量
 				ImGui::Spacing();
 				if (ImGui::Button("Apply View Distance"))//按钮, 用于应用视野区块距离
 				{
@@ -380,9 +380,7 @@ int main()
 
 		// 渲染当前加载的区块
 		// Render currently loaded chunks
-		for (auto& chunkPair : chunkManager.getChunks()) {
-			Chunk& chunk = chunkPair.second;// 这里的.second表示map中的值, .first表示map中的键
-			
+		chunkManager.forEachChunk([&](const std::string& key, Chunk& chunk) {
 			// 如果还没上传到 GPU，先上传
 			if (!chunk.hasGPUData()) {
 				chunk.uploadToGPU();
@@ -398,7 +396,7 @@ int main()
 
 				chunk.draw();
 			}
-		}
+		});
 
 		// 渲染GUI
 		// Render GUI
