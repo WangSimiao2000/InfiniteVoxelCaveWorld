@@ -201,6 +201,11 @@ int main()
 		glm::vec3 lightDirection = glm::vec3(0.35f, 0.6f, 0.10f);
 		lightDirection = glm::normalize(lightDirection);
 		ourShader.setVec3("lightDir", lightDirection);//设置光照方向
+
+		// 设置雾效参数（与背景色一致）
+		ourShader.setVec3("fogColor", glm::vec3(0.2f, 0.3f, 0.3f));
+		ourShader.setFloat("fogNear", 20.0f);
+		ourShader.setFloat("fogFar", 80.0f);
 	}
 
 	ChunkManager chunkManager(chunkSize, baseDir);//创建区块管理器对象	
