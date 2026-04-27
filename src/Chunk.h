@@ -40,7 +40,7 @@ public:
     std::vector<std::pair<glm::vec3, Face>> getVisibleFaces() const;
     std::vector<glm::vec3> getVoxelWorldPositions() const;
     void addVoxel(const glm::vec3& pos);
-    const std::vector<std::vector<std::vector<bool>>>& getChunkBlocks() const;
+    const std::vector<uint8_t>& getChunkBlocks() const;
     const std::vector<glm::vec3>& getVoxelPositions() const;
     void generateVisibleFaces();
 	glm::vec3 getMaxBounds() const;
@@ -57,10 +57,15 @@ private:
 	int chunkHeight = 64;
     std::vector<glm::vec3> voxelPositions;
 	glm::vec3 position;// The position of the chunk (world coordinates)
-    std::vector<std::vector<std::vector<bool>>> chunkBlocks;
+    std::vector<uint8_t> chunkBlocks;
     std::vector<std::pair<glm::vec3, Face>> visibleFaces;
     std::vector<Vertex> chunkVisibleFacesVertices;
     bool isVoxelAt(int x, int y, int z) const;
+
+    // 一维索引: x * chunkHeight * chunkWidthSize + y * chunkWidthSize + z
+    inline int blockIndex(int x, int y, int z) const {
+        return x * chunkHeight * chunkWidthSize + y * chunkWidthSize + z;
+    }
 
     GLuint VAO = 0;
     GLuint VBO = 0;

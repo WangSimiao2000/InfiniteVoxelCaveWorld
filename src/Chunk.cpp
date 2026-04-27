@@ -52,9 +52,7 @@ static const std::vector<Vertex> voxelVertices = {
 Chunk::Chunk(int size, const glm::vec3& position)
     : chunkWidthSize(size), position(position)
 {
-    chunkBlocks = std::vector<std::vector<std::vector<bool>>>(size,
-        std::vector<std::vector<bool>>(chunkHeight,
-			std::vector<bool>(size, false)));// 初始化三维布尔数组，表示每个体素是否被填充, 默认为false
+    chunkBlocks.resize(size * chunkHeight * size, 0);// 初始化一维数组，表示每个体素是否被填充, 默认为0
 	voxelPositions.reserve(size * chunkHeight * size);
 }
 
@@ -173,7 +171,7 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
                 float caveCombinedNoiseValue = weight1 * caveNoise1 + weight2 * caveNoise2;
 
                 if (caveCombinedNoiseValue < THRESHOLD) {
-                    chunkBlocks[x][y][z] = true;
+                    chunkBlocks[blockIndex(x, y, z)] = 1;
                     voxelPositions.push_back(glm::vec3(x, y, z));
                 }
             }
@@ -199,7 +197,7 @@ void Chunk::generateVisibleFaces() {
     for (int x = 0; x < chunkWidthSize; ++x) {
         for (int y = 0; y < chunkHeight; ++y) {
             for (int z = 0; z < chunkWidthSize; ++z) {
-                if (chunkBlocks[x][y][z]) {
+                if (chunkBlocks[blockIndex(x, y, z)]) {
                     glm::vec3 voxelPosition = glm::vec3(x, y, z);
                     if (!isVoxelAt(x + 1, y, z)) {
                         visibleFaces.emplace_back(voxelPosition, Face::RIGHT_FACE);
@@ -267,7 +265,7 @@ glm::vec3 Chunk::getChunkPosition() const
 // Determine if there is a voxel at the coordinate (x, y, z)
 bool Chunk::isVoxelAt(int x, int y, int z) const {
     if (x >= 0 && x < chunkWidthSize && y >= 0 && y < chunkHeight && z >= 0 && z < chunkWidthSize) {
-        return chunkBlocks[x][y][z];
+        return chunkBlocks[blockIndex(x, y, z)];
     }
     return false;
 }
@@ -280,14 +278,14 @@ void Chunk::addVoxel(const glm::vec3& pos) {
     int z = static_cast<int>(pos.z);
 
     if (x >= 0 && x < chunkWidthSize && y >= 0 && y < chunkHeight && z >= 0 && z < chunkWidthSize) {
-		chunkBlocks[x][y][z] = true;
+		chunkBlocks[blockIndex(x, y, z)] = 1;
         voxelPositions.push_back(pos);
     }
 }
 
 // 获取chunkBlocks: 三维布尔数组，表示每个体素是否被填充
 // Get chunkBlocks: a three-dimensional boolean array indicating whether each voxel is filled
-const std::vector<std::vector<std::vector<bool>>>& Chunk::getChunkBlocks() const {
+const std::vector<uint8_t>& Chunk::getChunkBlocks() const {
     return chunkBlocks;
 }
 
