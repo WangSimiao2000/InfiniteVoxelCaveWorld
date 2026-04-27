@@ -11,6 +11,7 @@
 
 #include <thread> 
 #include <atomic> //原子操作
+#include <mutex>
 
 #include "Shader.h"
 #include "stb/stb_image.h"
@@ -71,13 +72,17 @@ bool cameraControlEnabled = false;
 unsigned int chunkSize = 16;//区块大小
 int viewDistance = 2;//视野区块距离
 
+// 相机位置快照（主线程写，更新线程读）
+static std::mutex cameraMutex;
+static glm::vec3 cameraPositionSnapshot(0.0f);
+
 static void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& running) {
-	// 更新区块管理器
-	// Update the chunk manager
 	while (running)
 	{
-		chunkManager.update(camera.Position); // 更新区块管理器
-		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 添加一个小的延迟以避免占用过多的CPU
+		glm::vec3 pos;
+		{ std::lock_guard<std::mutex> lock(cameraMutex); pos = cameraPositionSnapshot; }
+		chunkManager.update(pos);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }
 
@@ -354,6 +359,7 @@ int main()
 		// 更新相机位置
 		// Update camera position
 		glm::vec3 cameraPosition = camera.Position;
+		{ std::lock_guard<std::mutex> lock(cameraMutex); cameraPositionSnapshot = cameraPosition; }
 		
 		// render
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //设置清空屏幕所用的颜色为深蓝色
