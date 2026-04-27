@@ -177,7 +177,6 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
             }
         }
     }
-    generateVisibleFaces();
 }
 
 // 获取体素的世界坐标(世界坐标 = 区块坐标 + 体素坐标)
@@ -236,6 +235,37 @@ void Chunk::generateVisibleFaces() {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+// 带邻居查询的版本：边界外的体素通过 neighborQuery(worldX, worldY, worldZ) 查询
+void Chunk::generateVisibleFaces(const std::function<bool(int, int, int)>& neighborQuery) {
+    visibleFaces.clear();
+    chunkVisibleFacesVertices.clear();
+    int ox = static_cast<int>(position.x);
+    int oy = static_cast<int>(position.y);
+    int oz = static_cast<int>(position.z);
+
+    auto hasVoxel = [&](int lx, int ly, int lz) -> bool {
+        if (lx >= 0 && lx < chunkWidthSize && ly >= 0 && ly < chunkHeight && lz >= 0 && lz < chunkWidthSize) {
+            return chunkBlocks[blockIndex(lx, ly, lz)] != 0;
+        }
+        return neighborQuery(ox + lx, oy + ly, oz + lz);
+    };
+
+    for (int x = 0; x < chunkWidthSize; ++x) {
+        for (int y = 0; y < chunkHeight; ++y) {
+            for (int z = 0; z < chunkWidthSize; ++z) {
+                if (!chunkBlocks[blockIndex(x, y, z)]) continue;
+                glm::vec3 vp(x, y, z);
+                if (!hasVoxel(x+1,y,z)) { visibleFaces.emplace_back(vp, Face::RIGHT_FACE);  for (int i=24;i<30;++i) chunkVisibleFacesVertices.push_back({voxelVertices[i].position+vp, voxelVertices[i].texCoords}); }
+                if (!hasVoxel(x-1,y,z)) { visibleFaces.emplace_back(vp, Face::LEFT_FACE);   for (int i=30;i<36;++i) chunkVisibleFacesVertices.push_back({voxelVertices[i].position+vp, voxelVertices[i].texCoords}); }
+                if (!hasVoxel(x,y+1,z)) { visibleFaces.emplace_back(vp, Face::TOP_FACE);    for (int i=12;i<18;++i) chunkVisibleFacesVertices.push_back({voxelVertices[i].position+vp, voxelVertices[i].texCoords}); }
+                if (!hasVoxel(x,y-1,z)) { visibleFaces.emplace_back(vp, Face::BOTTOM_FACE); for (int i=18;i<24;++i) chunkVisibleFacesVertices.push_back({voxelVertices[i].position+vp, voxelVertices[i].texCoords}); }
+                if (!hasVoxel(x,y,z+1)) { visibleFaces.emplace_back(vp, Face::FRONT_FACE);  for (int i= 0;i< 6;++i) chunkVisibleFacesVertices.push_back({voxelVertices[i].position+vp, voxelVertices[i].texCoords}); }
+                if (!hasVoxel(x,y,z-1)) { visibleFaces.emplace_back(vp, Face::BACK_FACE);   for (int i= 6;i<12;++i) chunkVisibleFacesVertices.push_back({voxelVertices[i].position+vp, voxelVertices[i].texCoords}); }
             }
         }
     }

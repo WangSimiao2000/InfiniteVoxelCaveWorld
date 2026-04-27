@@ -165,11 +165,12 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
         while (inFile.read(reinterpret_cast<char*>(&pos), sizeof(glm::vec3))) {
             chunk->addVoxel(pos);
         }
-		chunk->generateVisibleFaces();
+		chunk->generateVisibleFaces([this](int wx, int wy, int wz) { return isVoxelAtWorld(wx, wy, wz); });
         inFile.close();
     }
     else {
         chunk->initializeChunk(noise1, noise2, weight1, weight2, THRESHOLD);
+        chunk->generateVisibleFaces([this](int wx, int wy, int wz) { return isVoxelAtWorld(wx, wy, wz); });
         saveChunkToFile(*chunk, filename);
     }
 
@@ -177,6 +178,23 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
         std::lock_guard<std::mutex> lock(chunksMutex);
         chunks[key] = std::move(chunk);
     }
+}
+
+// 查询世界坐标处是否有体素（用于跨区块边界面剔除）
+bool ChunkManager::isVoxelAtWorld(int wx, int wy, int wz) {
+    // 计算所属区块的位置
+    int cx = (wx >= 0 ? wx : wx - chunkSize + 1) / chunkSize * chunkSize;
+    int cz = (wz >= 0 ? wz : wz - chunkSize + 1) / chunkSize * chunkSize;
+    std::string key = getChunkKey(glm::vec3(cx, 0, cz));
+    auto it = chunks.find(key);
+    if (it == chunks.end()) return false;
+    int lx = wx - cx;
+    int ly = wy;
+    int lz = wz - cz;
+    auto& blk = it->second->getChunkBlocks();
+    int h = 64; // chunkHeight
+    if (lx < 0 || lx >= chunkSize || ly < 0 || ly >= h || lz < 0 || lz >= chunkSize) return false;
+    return blk[lx * h * chunkSize + ly * chunkSize + lz] != 0;
 }
 
 // 将区块数据保存到文件

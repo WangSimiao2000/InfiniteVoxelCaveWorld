@@ -2,6 +2,7 @@
 #define CHUNK_H
 
 #include <vector>
+#include <functional>
 #include <glm/glm.hpp>
 #include <array>
 #include <glad/glad.h>
@@ -43,6 +44,8 @@ public:
     const std::vector<uint8_t>& getChunkBlocks() const;
     const std::vector<glm::vec3>& getVoxelPositions() const;
     void generateVisibleFaces();
+    // 带邻居查询的版本：neighborQuery(worldX, worldY, worldZ) 返回该世界坐标是否有体素
+    void generateVisibleFaces(const std::function<bool(int, int, int)>& neighborQuery);
 	glm::vec3 getMaxBounds() const;
 	glm::vec3 getMinBounds() const;
 	const std::vector<Vertex>& getChunkVisibleFacesVertices() const;

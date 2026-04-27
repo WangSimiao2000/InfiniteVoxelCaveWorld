@@ -48,6 +48,7 @@ private:
     std::string getChunkKey(const glm::vec3& position);
     void loadChunk(const glm::vec3& position);
     void saveChunkToFile(const Chunk& chunk, const std::string& filename);
+    bool isVoxelAtWorld(int wx, int wy, int wz);
 };
 
 #endif // CHUNK_MANAGER_H
