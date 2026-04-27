@@ -58,11 +58,6 @@ Chunk::Chunk(int size, const glm::vec3& position)
 	voxelPositions.reserve(size * chunkHeight * size);
 }
 
-// 默认构造函数，初始化区块大小为16，位置为原点
-// Default constructor, initialize the size of the chunk to 16 and the position to the origin
-Chunk::Chunk()
-    :   Chunk(16, glm::vec3(0.0f)) {}
-
 // 析构函数，释放VAO和VBO, 会在对象销毁时调用, 有参数的构造函数在对象销毁时也会调用
 // Destructor, release VAO and VBO, will be called when the object is destroyed, and the constructor with parameters will also be called when the object is destroyed
 Chunk::~Chunk()

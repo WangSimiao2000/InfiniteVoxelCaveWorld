@@ -2,7 +2,7 @@
 
 // 构造函数，初始化区块大小
 // Constructor, initialize chunk size
-ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
+ChunkManager::ChunkManager(int chunkSize, const std::string& baseDir) : chunkSize(chunkSize), baseDir(baseDir) {
 
     std::cout << "Initializing Origin Chunks" << std::endl;
 
@@ -12,8 +12,8 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
     // 如果不存在chunks文件夹，则创建
 	// Create the chunks folder if it doesn't exist
-    if (!std::filesystem::exists("chunks")) {
-        std::filesystem::create_directory("chunks");
+    if (!std::filesystem::exists(baseDir + "chunks")) {
+        std::filesystem::create_directory(baseDir + "chunks");
     }
 
     // 配置噪声生成器
@@ -62,7 +62,7 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
             }
             //  临时存储需要保留的区块
 			// Temporary storage for chunks to be retained
-            tempChunks[key] = chunks[key];
+            tempChunks.insert_or_assign(key, chunks.at(key));
         }
     }
 
@@ -100,8 +100,8 @@ bool ChunkManager::getIsLoading() const
 
 void ChunkManager::clearChunksFolder()
 {
-	std::filesystem::remove_all("chunks");
-	std::filesystem::create_directory("chunks");
+	std::filesystem::remove_all(baseDir + "chunks");
+	std::filesystem::create_directory(baseDir + "chunks");
 	//std::cout << "Cleared all chunks in the folder." << std::endl;
 }
 
@@ -167,7 +167,7 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
                 //std::cout << "Chunk generated " << key <<" in " << generationTime.count() << " seconds." << std::endl;
             }
             //  临时存储需要保留的区块
-            tempChunks[key] = chunks[key];
+            tempChunks.insert_or_assign(key, chunks.at(key));
         }
     }
     
@@ -205,7 +205,7 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
     std::string key = getChunkKey(position);
 	// 生成区块文件名
 	// Generate chunk file name
-    std::string filename = "chunks/" + key + ".chunk";
+    std::string filename = baseDir + "chunks/" + key + ".chunk";
 
     Chunk chunk(chunkSize, position); // 创建空的Chunk对象
 
@@ -233,7 +233,7 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
 	// Store the loaded chunks in chunks
     {
         std::lock_guard<std::mutex> lock(chunksMutex);
-        chunks[key] = chunk;
+        chunks.insert_or_assign(key, std::move(chunk));
     }
 }
 

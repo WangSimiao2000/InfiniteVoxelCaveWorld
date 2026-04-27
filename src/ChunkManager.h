@@ -12,7 +12,7 @@
 
 class ChunkManager {
 public:
-    ChunkManager(int chunkSize);
+    ChunkManager(int chunkSize, const std::string& baseDir);
     void update(const glm::vec3& cameraPosition);
     void clearChunks(); // Clear loaded chunks
     void stopLoading(); // Stop loading chunks (useful for pausing chunk loading)
@@ -25,6 +25,7 @@ public:
 
 private:
     std::mutex chunksMutex; // Mutex lock
+    std::string baseDir; // Base directory for chunk files
     int chunkSize; // Size of each chunk
     glm::vec3 lastCameraPosition; // Camera position in the previous frame
     FastNoiseLite noise1; // First noise generator

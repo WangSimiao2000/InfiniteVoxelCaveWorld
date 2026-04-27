@@ -6,25 +6,28 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # --- Sources ---
 set(SOURCES
-    main.cpp
-    Chunk.cpp
-    ChunkManager.cpp
-    stb_image.cpp
-    glad.c
-    imgui/imgui.cpp
-    imgui/imgui_draw.cpp
-    imgui/imgui_tables.cpp
-    imgui/imgui_widgets.cpp
-    imgui/imgui_demo.cpp
-    imgui/imgui_impl_glfw.cpp
-    imgui/imgui_impl_opengl3.cpp
+    src/main.cpp
+    src/Chunk.cpp
+    src/ChunkManager.cpp
+    third_party/stb/stb_image.cpp
+    third_party/glad/glad.c
+    third_party/imgui/imgui.cpp
+    third_party/imgui/imgui_draw.cpp
+    third_party/imgui/imgui_tables.cpp
+    third_party/imgui/imgui_widgets.cpp
+    third_party/imgui/imgui_demo.cpp
+    third_party/imgui/imgui_impl_glfw.cpp
+    third_party/imgui/imgui_impl_opengl3.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # --- Include paths ---
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/third_party
+    ${CMAKE_SOURCE_DIR}/third_party/glad
+    ${CMAKE_SOURCE_DIR}/third_party/imgui
     ${CMAKE_SOURCE_DIR}/OpenGL/include
 )
 
@@ -44,5 +47,5 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_SOURCE_DIR}/stone_16.png $<TARGET_FILE_DIR:${PROJECT_NAME}>/stone_16.png
+        ${CMAKE_SOURCE_DIR}/textures/stone_16.png $<TARGET_FILE_DIR:${PROJECT_NAME}>/textures/stone_16.png
 )

@@ -7,12 +7,13 @@
 
 #include <iostream>
 #include <vector>
+#include <filesystem>
 
 #include <thread> 
 #include <atomic> //原子操作
 
 #include "Shader.h"
-#include "stb_image.h"
+#include "stb/stb_image.h"
 #include "Camera.h"
 #include "Chunk.h"
 #include "ChunkManager.h"
@@ -24,6 +25,13 @@
 
 
 std::atomic<bool> updateChunks(true);
+
+// 获取可执行文件所在目录
+// Get the directory of the executable
+static std::string getExeDir() {
+	auto path = std::filesystem::canonical("/proc/self/exe").parent_path();
+	return path.string() + "/";
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -121,7 +129,9 @@ int main()
 	// Enable face culling
 	glEnable(GL_CULL_FACE);
 
-	Shader ourShader("shaders/VertexShader.vert", "shaders/FragmentShader.frag");//创建着色器对象
+	std::string baseDir = getExeDir();
+
+	Shader ourShader((baseDir + "shaders/VertexShader.vert").c_str(), (baseDir + "shaders/FragmentShader.frag").c_str());//创建着色器对象
 	ourShader.use();//使用着色器程序
 
 	// 初始化ImGui
@@ -158,7 +168,7 @@ int main()
 		int width, height, nrChannels;//图片宽度, 高度, 颜色通道数,这里的width, height, nrChannels是通过stbi_load函数返回的
 		stbi_set_flip_vertically_on_load(true);//翻转图片y轴, 因为OpenGL的坐标原点在窗口左下角, 而图片的坐标原点在左上角
 		//unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);//加载箱子纹理图片
-		unsigned char* data = stbi_load("stone_16.png", &width, &height, &nrChannels, 0);//加载minecraft石头纹理图片
+		unsigned char* data = stbi_load((baseDir + "textures/stone_16.png").c_str(), &width, &height, &nrChannels, 0);//加载minecraft石头纹理图片
 		if (data)
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);//生成纹理, 参数分别为纹理目标, mipmap级别, 纹理存储格式, 宽, 高, 0, 源图格式, 源图数据类型, 图像数据
@@ -188,7 +198,7 @@ int main()
 		ourShader.setVec3("lightDir", lightDirection);//设置光照方向
 	}
 
-	ChunkManager chunkManager(chunkSize);//创建区块管理器对象	
+	ChunkManager chunkManager(chunkSize, baseDir);//创建区块管理器对象	
 
 	std::thread chunkUpdateThread(updateChunksThread, std::ref(chunkManager), std::ref(updateChunks));//创建一个线程, 用于更新区块管理器
 	

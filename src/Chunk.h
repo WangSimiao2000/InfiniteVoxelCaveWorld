@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <array>
 #include <glad/glad.h>
-#include "FastNoiseLite.h"
+#include "FastNoiseLite/FastNoiseLite.h"
 
 // 面的枚举类型
 // Enum type of faces
@@ -27,7 +27,6 @@ struct Vertex {
 class Chunk {
 public:
     Chunk(int size, const glm::vec3& position);
-    Chunk();
     ~Chunk();
 
     void initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float weight1, float weight2, float THRESHOLD);
