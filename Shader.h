@@ -12,37 +12,37 @@ class Shader
 {
 public:
     unsigned int ID;
-	// ¹¹ÔìÆ÷¶ÁÈ¡²¢¹¹½¨×ÅÉ«Æ÷
+	// æ„é€ å™¨è¯»å–å¹¶æ„å»ºç€è‰²å™¨
     Shader(const char* vertexPath, const char* fragmentPath)
     {
 		std::cout << "Loading Vertex And Fragment Shaders" << std::endl;
         // 1. retrieve the vertex/fragment source code from filePath
-		// 1. ´ÓÎÄ¼şÂ·¾¶ÖĞ¼ìË÷¶¥µã/Æ¬¶Î×ÅÉ«Æ÷µÄÔ´´úÂë
+		// 1. ä»æ–‡ä»¶è·¯å¾„ä¸­æ£€ç´¢é¡¶ç‚¹/ç‰‡æ®µç€è‰²å™¨çš„æºä»£ç 
         std::string vertexCode;
         std::string fragmentCode;
         std::ifstream vShaderFile;
         std::ifstream fShaderFile;
         // ensure ifstream objects can throw exceptions:
-		// È·±£ifstream¶ÔÏó¿ÉÒÔÅ×³öÒì³££º
+		// ç¡®ä¿ifstreamå¯¹è±¡å¯ä»¥æŠ›å‡ºå¼‚å¸¸ï¼š
         vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         try
         {
             // open files
-			// ´ò¿ªÎÄ¼ş
+			// æ‰“å¼€æ–‡ä»¶
             vShaderFile.open(vertexPath);
             fShaderFile.open(fragmentPath);
             std::stringstream vShaderStream, fShaderStream;
             // read file's buffer contents into streams
-			// ½«ÎÄ¼şµÄ»º³åÄÚÈİ¶ÁÈëÁ÷ÖĞ
+			// å°†æ–‡ä»¶çš„ç¼“å†²å†…å®¹è¯»å…¥æµä¸­
             vShaderStream << vShaderFile.rdbuf();
             fShaderStream << fShaderFile.rdbuf();
             // close file handlers
-			// ¹Ø±ÕÎÄ¼ş´¦Àí³ÌĞò
+			// å…³é—­æ–‡ä»¶å¤„ç†ç¨‹åº
             vShaderFile.close();
             fShaderFile.close();
             // convert stream into string
-			// ½«Á÷×ª»»Îª×Ö·û´®
+			// å°†æµè½¬æ¢ä¸ºå­—ç¬¦ä¸²
             vertexCode = vShaderStream.str();
             fragmentCode = fShaderStream.str();
         }
@@ -53,40 +53,40 @@ public:
         const char* vShaderCode = vertexCode.c_str();
         const char* fShaderCode = fragmentCode.c_str();
         // 2. compile shaders
-		// 2. ±àÒë×ÅÉ«Æ÷
+		// 2. ç¼–è¯‘ç€è‰²å™¨
         unsigned int vertex, fragment;
         // vertex shader
-		// ¶¥µã×ÅÉ«Æ÷
+		// é¡¶ç‚¹ç€è‰²å™¨
         vertex = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertex, 1, &vShaderCode, NULL);
         glCompileShader(vertex);
         checkCompileErrors(vertex, "VERTEX");
         // fragment Shader
-		// Æ¬¶Î×ÅÉ«Æ÷
+		// ç‰‡æ®µç€è‰²å™¨
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragment, 1, &fShaderCode, NULL);
         glCompileShader(fragment);
         checkCompileErrors(fragment, "FRAGMENT");
         // shader Program
-		// ×ÅÉ«Æ÷³ÌĞò
+		// ç€è‰²å™¨ç¨‹åº
         ID = glCreateProgram();
         glAttachShader(ID, vertex);
         glAttachShader(ID, fragment);
         glLinkProgram(ID);
         checkCompileErrors(ID, "PROGRAM");
         // delete the shaders as they're linked into our program now and no longer necessary
-		// É¾³ı×ÅÉ«Æ÷£¬ÒòÎªËüÃÇÏÖÔÚÒÑ¾­Á´½Óµ½ÎÒÃÇµÄ³ÌĞòÖĞ£¬²»ÔÙĞèÒª
+		// åˆ é™¤ç€è‰²å™¨ï¼Œå› ä¸ºå®ƒä»¬ç°åœ¨å·²ç»é“¾æ¥åˆ°æˆ‘ä»¬çš„ç¨‹åºä¸­ï¼Œä¸å†éœ€è¦
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
     // activate the shader
-	// ¼¤»î×ÅÉ«Æ÷
+	// æ¿€æ´»ç€è‰²å™¨
     void use()
     {
         glUseProgram(ID);
     }
     // utility uniform functions
-	// ÉèÖÃuniformµÄ¹¤¾ßº¯Êı
+	// è®¾ç½®uniformçš„å·¥å…·å‡½æ•°
     void setBool(const std::string& name, bool value) const
     {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
@@ -138,7 +138,7 @@ public:
 
 private:
     // utility function for checking shader compilation/linking errors.
-	// ¼ì²é×ÅÉ«Æ÷±àÒë/Á´½Ó´íÎóµÄÊµÓÃ³ÌĞòº¯Êı¡£
+	// æ£€æŸ¥ç€è‰²å™¨ç¼–è¯‘/é“¾æ¥é”™è¯¯çš„å®ç”¨ç¨‹åºå‡½æ•°ã€‚
     void checkCompileErrors(unsigned int shader, std::string type)
     {
         int success;

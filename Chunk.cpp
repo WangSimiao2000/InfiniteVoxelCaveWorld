@@ -1,8 +1,8 @@
 #include "Chunk.h"
 
-// µ¥¸öÌåËØµÄ¶¥µãÊı¾İ
+// å•ä¸ªä½“ç´ çš„é¡¶ç‚¹æ•°æ®
 // Vertex data for a single voxel
-extern std::vector<Vertex> voxelVertices = {
+static const std::vector<Vertex> voxelVertices = {
     // Front face
     {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
     {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
@@ -47,29 +47,29 @@ extern std::vector<Vertex> voxelVertices = {
     {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}}
 };
 
-// ³õÊ¼»¯Çø¿éµÄ±ß³¤ºÍÎ»ÖÃ; ·ÖÅäÈıÎ¬²¼¶ûÊı×éµÄÄÚ´æ, ±íÊ¾Ã¿¸öÌåËØÊÇ·ñ±»Ìî³ä; ³õÊ¼»¯Ìİ¶ÈÏòÁ¿Êı×é
+// åˆå§‹åŒ–åŒºå—çš„è¾¹é•¿å’Œä½ç½®; åˆ†é…ä¸‰ç»´å¸ƒå°”æ•°ç»„çš„å†…å­˜, è¡¨ç¤ºæ¯ä¸ªä½“ç´ æ˜¯å¦è¢«å¡«å……; åˆå§‹åŒ–æ¢¯åº¦å‘é‡æ•°ç»„
 // Initialize the size and position of the chunk; Allocate memory for the three-dimensional boolean array, indicating whether each voxel is filled; Initialize the gradient vector array
 Chunk::Chunk(int size, const glm::vec3& position)
     : chunkWidthSize(size), position(position)
 {
     chunkBlocks = std::vector<std::vector<std::vector<bool>>>(size,
         std::vector<std::vector<bool>>(chunkHeight,
-			std::vector<bool>(size, false)));// ³õÊ¼»¯ÈıÎ¬²¼¶ûÊı×é£¬±íÊ¾Ã¿¸öÌåËØÊÇ·ñ±»Ìî³ä, Ä¬ÈÏÎªfalse
+			std::vector<bool>(size, false)));// åˆå§‹åŒ–ä¸‰ç»´å¸ƒå°”æ•°ç»„ï¼Œè¡¨ç¤ºæ¯ä¸ªä½“ç´ æ˜¯å¦è¢«å¡«å……, é»˜è®¤ä¸ºfalse
 	voxelPositions.reserve(size * chunkHeight * size);
 }
 
-// Ä¬ÈÏ¹¹Ôìº¯Êı£¬³õÊ¼»¯Çø¿é´óĞ¡Îª16£¬Î»ÖÃÎªÔ­µã
+// é»˜è®¤æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–åŒºå—å¤§å°ä¸º16ï¼Œä½ç½®ä¸ºåŸç‚¹
 // Default constructor, initialize the size of the chunk to 16 and the position to the origin
 Chunk::Chunk()
     :   Chunk(16, glm::vec3(0.0f)) {}
 
-// Îö¹¹º¯Êı£¬ÊÍ·ÅVAOºÍVBO, »áÔÚ¶ÔÏóÏú»ÙÊ±µ÷ÓÃ, ÓĞ²ÎÊıµÄ¹¹Ôìº¯ÊıÔÚ¶ÔÏóÏú»ÙÊ±Ò²»áµ÷ÓÃ
+// ææ„å‡½æ•°ï¼Œé‡Šæ”¾VAOå’ŒVBO, ä¼šåœ¨å¯¹è±¡é”€æ¯æ—¶è°ƒç”¨, æœ‰å‚æ•°çš„æ„é€ å‡½æ•°åœ¨å¯¹è±¡é”€æ¯æ—¶ä¹Ÿä¼šè°ƒç”¨
 // Destructor, release VAO and VBO, will be called when the object is destroyed, and the constructor with parameters will also be called when the object is destroyed
 Chunk::~Chunk()
 {
 }
 
-// ³õÊ¼»¯Çø¿é
+// åˆå§‹åŒ–åŒºå—
 //void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float weight1, float weight2, float THRESHOLD) {
 //    voxelPositions.clear();
 //    for (int x = 0; x < size; ++x) {
@@ -93,18 +93,18 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
     voxelPositions.clear();
     for (int x = 0; x < chunkWidthSize; ++x) {
         for (int z = 0; z < chunkWidthSize; ++z) {
-            // ¼ÆËãµØĞÎ¸ß¶È
-            // µ÷ÕûÔëÉùµÄ·ù¶È
+            // è®¡ç®—åœ°å½¢é«˜åº¦
+            // è°ƒæ•´å™ªå£°çš„å¹…åº¦
             float amplitude = 0.5f;
             float noiseValue1 = noise1.GetNoise(position.x + x, position.z + z) * amplitude;
             float noiseValue2 = noise2.GetNoise(position.x + x, position.z + z) * amplitude;
             float combinedNoiseValue = weight1 * noiseValue1 + weight2 * noiseValue2;
-			int terrainHeight = chunkHeight - 4 + static_cast<int>((combinedNoiseValue + 1.0f) * 0.5f * 4);// ÕâÀïµÄ4ÊÇµØĞÎµÄ×îĞ¡¸ß¶È
+			int terrainHeight = chunkHeight - 4 + static_cast<int>((combinedNoiseValue + 1.0f) * 0.5f * 4);// è¿™é‡Œçš„4æ˜¯åœ°å½¢çš„æœ€å°é«˜åº¦
 
-			for (int y = 0; y < terrainHeight - 16; ++y) {//-16ÊÇÎªÁË±ÜÃâµØĞÎÌ«µÍ£¬µ¼ÖÂµØĞÎÏÂ·½Éú³É¶´Ñ¨
-                // Èç¹ûµ±Ç°Î»ÖÃÔÚµØĞÎ¸ß¶ÈÒÔÏÂ
+			for (int y = 0; y < terrainHeight - 16; ++y) {//-16æ˜¯ä¸ºäº†é¿å…åœ°å½¢å¤ªä½ï¼Œå¯¼è‡´åœ°å½¢ä¸‹æ–¹ç”Ÿæˆæ´ç©´
+                // å¦‚æœå½“å‰ä½ç½®åœ¨åœ°å½¢é«˜åº¦ä»¥ä¸‹
 				// If the current position is below the terrain height
-                // ÅĞ¶ÏÊÇ·ñÉú³É¶´Ñ¨
+                // åˆ¤æ–­æ˜¯å¦ç”Ÿæˆæ´ç©´
 				// Determine whether to generate a cave
                 float frequency = 0.7f;
                 float caveNoise1 = noise1.GetNoise((position.x + x) * frequency, (position.y + y) * frequency, (position.z + z) * frequency);
@@ -121,7 +121,7 @@ void Chunk::initializeChunk(FastNoiseLite& noise1, FastNoiseLite& noise2, float 
     generateVisibleFaces();
 }
 
-// »ñÈ¡ÌåËØµÄÊÀ½ç×ø±ê(ÊÀ½ç×ø±ê = Çø¿é×ø±ê + ÌåËØ×ø±ê)
+// è·å–ä½“ç´ çš„ä¸–ç•Œåæ ‡(ä¸–ç•Œåæ ‡ = åŒºå—åæ ‡ + ä½“ç´ åæ ‡)
 // Get the world coordinates of the voxel (world coordinates = chunk coordinates + voxel coordinates)
 std::vector<glm::vec3> Chunk::getVoxelWorldPositions() const {
     std::vector<glm::vec3> worldPositions;
@@ -131,7 +131,7 @@ std::vector<glm::vec3> Chunk::getVoxelWorldPositions() const {
     return worldPositions;
 }
 
-// ½«¿É¼ûÃæÌí¼Óµ½visibleFacesÊı×éÖĞ
+// å°†å¯è§é¢æ·»åŠ åˆ°visibleFacesæ•°ç»„ä¸­
 // Add visible faces to the visibleFaces array
 void Chunk::generateVisibleFaces() {
     visibleFaces.clear();
@@ -202,7 +202,7 @@ glm::vec3 Chunk::getChunkPosition() const
     return position;
 }
 
-// ÅĞ¶Ï×ø±ê(x, y, z)´¦ÊÇ·ñÓĞÌåËØ
+// åˆ¤æ–­åæ ‡(x, y, z)å¤„æ˜¯å¦æœ‰ä½“ç´ 
 // Determine if there is a voxel at the coordinate (x, y, z)
 bool Chunk::isVoxelAt(int x, int y, int z) const {
     if (x >= 0 && x < chunkWidthSize && y >= 0 && y < chunkHeight && z >= 0 && z < chunkWidthSize) {
@@ -211,7 +211,7 @@ bool Chunk::isVoxelAt(int x, int y, int z) const {
     return false;
 }
 
-// Ìí¼ÓÌåËØµ½Çø¿éÖĞ,µ±ÌåËØµÄ×ø±êÔÚÇø¿é·¶Î§ÄÚÊ±£¬½«ÌåËØµÄ×ø±êÌí¼Óµ½voxelPositionsÊı×éÖĞ, ÓÃÓÚºóĞøäÖÈ¾
+// æ·»åŠ ä½“ç´ åˆ°åŒºå—ä¸­,å½“ä½“ç´ çš„åæ ‡åœ¨åŒºå—èŒƒå›´å†…æ—¶ï¼Œå°†ä½“ç´ çš„åæ ‡æ·»åŠ åˆ°voxelPositionsæ•°ç»„ä¸­, ç”¨äºåç»­æ¸²æŸ“
 // Add voxels to the chunk. When the voxel coordinates are within the chunk range, add the voxel coordinates to the voxelPositions array for subsequent rendering
 void Chunk::addVoxel(const glm::vec3& pos) {
     int x = static_cast<int>(pos.x);
@@ -224,19 +224,19 @@ void Chunk::addVoxel(const glm::vec3& pos) {
     }
 }
 
-// »ñÈ¡chunkBlocks: ÈıÎ¬²¼¶ûÊı×é£¬±íÊ¾Ã¿¸öÌåËØÊÇ·ñ±»Ìî³ä
+// è·å–chunkBlocks: ä¸‰ç»´å¸ƒå°”æ•°ç»„ï¼Œè¡¨ç¤ºæ¯ä¸ªä½“ç´ æ˜¯å¦è¢«å¡«å……
 // Get chunkBlocks: a three-dimensional boolean array indicating whether each voxel is filled
 const std::vector<std::vector<std::vector<bool>>>& Chunk::getChunkBlocks() const {
     return chunkBlocks;
 }
 
-// »ñÈ¡voxelPositions: ÌåËØµÄÏà¶Ô×ø±êµÄÊı×é
+// è·å–voxelPositions: ä½“ç´ çš„ç›¸å¯¹åæ ‡çš„æ•°ç»„
 // Get voxelPositions: an array of relative voxel coordinates
 const std::vector<glm::vec3>& Chunk::getVoxelPositions() const {
     return voxelPositions;
 }
 
-// »ñÈ¡Çø¿éÖĞµÄ¿É¼ûÃæ
+// è·å–åŒºå—ä¸­çš„å¯è§é¢
 // Get the visible faces in the chunk
 std::vector<std::pair<glm::vec3, Face>> Chunk::getVisibleFaces() const {
     return visibleFaces;

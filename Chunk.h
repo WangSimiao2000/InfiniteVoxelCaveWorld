@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 #include "FastNoiseLite.h"
 
-// ÃæµÄÃ¶¾ÙÀàĞÍ
+// é¢çš„æšä¸¾ç±»å‹
 // Enum type of faces
 enum Face {
     FRONT_FACE,
@@ -18,7 +18,7 @@ enum Face {
     RIGHT_FACE
 };
 
-// ¶¥µã½á¹¹Ìå
+// é¡¶ç‚¹ç»“æ„ä½“
 // Vertex structure
 struct Vertex {
 	glm::vec3 position;

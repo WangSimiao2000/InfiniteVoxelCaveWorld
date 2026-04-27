@@ -2,46 +2,46 @@
 out vec4 FragColor;
 
 in vec2 TexCoord;
-in vec3 FragPos; // ´Ó¶¥µã×ÅÉ«Æ÷´«ÈëµÄ¶¥µãÎ»ÖÃ
+in vec3 FragPos; // ä»é¡¶ç‚¹ç€è‰²å™¨ä¼ å…¥çš„é¡¶ç‚¹ä½ç½®
 
 // texture sampler
 uniform sampler2D ourTexture;
-uniform vec3 lightDir; // Æ½ĞĞ¹â·½Ïò
-uniform vec3 viewPos; // ÊÓµãÎ»ÖÃ
+uniform vec3 lightDir; // å¹³è¡Œå…‰æ–¹å‘
+uniform vec3 viewPos; // è§†ç‚¹ä½ç½®
 
 void main()
 {
-	// ¶¨Òå¹âÕÕÑÕÉ«
-    float ambientStrength = 0.5; // »·¾³¹âÇ¿¶È
-    float specularStrength = 0.1; // ¾µÃæ·´ÉäÇ¿¶È
-    float shininess = 32.0; // ¸ß¹âÏµÊı
+	// å®šä¹‰å…‰ç…§é¢œè‰²
+    float ambientStrength = 0.5; // ç¯å¢ƒå…‰å¼ºåº¦
+    float specularStrength = 0.1; // é•œé¢åå°„å¼ºåº¦
+    float shininess = 32.0; // é«˜å…‰ç³»æ•°
     vec3 lightColor = vec3(1.0, 0.95, 0.9);
 
-	// ¼ÆËã»ù±¾±äÁ¿
+	// è®¡ç®—åŸºæœ¬å˜é‡
     vec3 normal = normalize(cross(dFdx(FragPos), dFdy(FragPos))); 
-    vec3 lightDirNormalized = normalize(lightDir); // Æ½ĞĞ¹â·½ÏòÒÑ¾­ÊÇ±ê×¼»¯µÄ
-    vec3 viewDir = normalize(viewPos - FragPos); // ÊÓÏß·½Ïò
-    vec3 halfwayDir = normalize(lightDir + viewDir); // °ë³ÌÏòÁ¿
+    vec3 lightDirNormalized = normalize(lightDir); // å¹³è¡Œå…‰æ–¹å‘å·²ç»æ˜¯æ ‡å‡†åŒ–çš„
+    vec3 viewDir = normalize(viewPos - FragPos); // è§†çº¿æ–¹å‘
+    vec3 halfwayDir = normalize(lightDir + viewDir); // åŠç¨‹å‘é‡
 
-     // ´ÓÎÆÀíÖĞ»ñÈ¡²ÄÖÊÑÕÉ«
+     // ä»çº¹ç†ä¸­è·å–æè´¨é¢œè‰²
     vec3 materialColor = texture(ourTexture, TexCoord).rgb;
 
-    // »·¾³¹âÇ¿¶È
+    // ç¯å¢ƒå…‰å¼ºåº¦
     vec3 ambient = ambientStrength * lightColor * materialColor;
 
-    // Âş·´ÉäÇ¿¶È
+    // æ¼«åå°„å¼ºåº¦
     float diff = max(dot(normal, lightDirNormalized), 0.0);
     vec3 diffuse = diff * lightColor * materialColor;
 
-    // ¾µÃæ·´ÉäÇ¿¶È
+    // é•œé¢åå°„å¼ºåº¦
     float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
     vec3 specular = specularStrength * spec * lightColor;
 
-    // ºÏ³É×îÖÕÑÕÉ«
+    // åˆæˆæœ€ç»ˆé¢œè‰²
     vec3 finalColor = ambient + diffuse + specular;
 
-    // ½«×îÖÕÑÕÉ«¸³Öµ¸øÆ¬¶ÎÑÕÉ«Êä³ö
+    // å°†æœ€ç»ˆé¢œè‰²èµ‹å€¼ç»™ç‰‡æ®µé¢œè‰²è¾“å‡º
     FragColor = vec4(finalColor, 1.0);
 
-	//FragColor = texture(ourTexture, TexCoord);//ÕâÀïÊÇÖ±½Ó½«ÎÆÀí¸³Öµ¸øÑÕÉ«
+	//FragColor = texture(ourTexture, TexCoord);//è¿™é‡Œæ˜¯ç›´æ¥å°†çº¹ç†èµ‹å€¼ç»™é¢œè‰²
 }

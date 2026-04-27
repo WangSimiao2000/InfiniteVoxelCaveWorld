@@ -3,7 +3,7 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
 
 out vec2 TexCoord;
-out vec3 FragPos; // Æ¬¶Î×ÅÉ«Æ÷ĞèÒªÊ¹ÓÃµÄ¶¥µãÎ»ÖÃ
+out vec3 FragPos; // ç‰‡æ®µç€è‰²å™¨éœ€è¦ä½¿ç”¨çš„é¡¶ç‚¹ä½ç½®
 
 uniform mat4 model;
 uniform mat4 view;
@@ -13,5 +13,5 @@ void main()
 {
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 	TexCoord = vec2(aTexCoord.x, aTexCoord.y);
-	FragPos = vec3(model * vec4(aPos, 1.0)); // ½«¶¥µãÎ»ÖÃ±ä»»µ½ÊÀ½ç×ø±êÏµ
+	FragPos = vec3(model * vec4(aPos, 1.0)); // å°†é¡¶ç‚¹ä½ç½®å˜æ¢åˆ°ä¸–ç•Œåæ ‡ç³»
 }

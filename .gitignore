@@ -399,3 +399,7 @@ FodyWeavers.xsd
 
 # 生成的区块文件
 *.chunk
+
+# CMake
+build/
+CMakeUserPresets.json

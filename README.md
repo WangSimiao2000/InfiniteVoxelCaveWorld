@@ -3,9 +3,9 @@
 
 ## Introduce 简介
 
-This is a Windows-based project for procedurally generating voxel caves. It primarily implements chunk-based data structures, uses noise functions as thresholds for cave and terrain generation, employs OpenGL to render voxel terrain, optimizes performance with voxel face culling and frustum culling, and utilizes multithreading to separate rendering from generation logic, enabling the creation of an infinite voxel cave terrain.
+A cross-platform project for procedurally generating voxel caves. It primarily implements chunk-based data structures, uses noise functions as thresholds for cave and terrain generation, employs OpenGL to render voxel terrain, optimizes performance with voxel face culling and frustum culling, and utilizes multithreading to separate rendering from generation logic, enabling the creation of an infinite voxel cave terrain.
 
-这是一个Windows平台的程序化生成体素洞穴工程, 主要实现了以区块为数据结构, 以噪声为洞穴和地形的生成阈值, 使用OpenGL渲染体素地形, 使用体素相邻面剔除和视锥体剔除技术优化性能, 使用多线程将渲染与生成逻辑分离, 实现生成无限大的体素洞穴地形的程序
+一个跨平台（Windows / Linux）的程序化生成体素洞穴工程, 主要实现了以区块为数据结构, 以噪声为洞穴和地形的生成阈值, 使用OpenGL渲染体素地形, 使用体素相邻面剔除和视锥体剔除技术优化性能, 使用多线程将渲染与生成逻辑分离, 实现生成无限大的体素洞穴地形的程序
 
 ## Features 特性
 
@@ -29,15 +29,32 @@ This is a Windows-based project for procedurally generating voxel caves. It prim
 
 ### System Requirements 系统需求
 
- - Windows
- - OpenGL3.0+
- - Visual Studio 2022
+ - Windows / Linux
+ - OpenGL 3.0+
+ - Visual Studio 2022 (Windows) or CMake 3.16+ (Linux)
 
 ## Installation Steps 安装步骤
+
+### Windows
 
 Simply clone the repository and double-click the .sln file to open it with Visual Studio.
 
 直接克隆仓库并双击sln使用VisualStudio打开即可
+
+### Linux
+
+```bash
+# 安装依赖 Install dependencies
+sudo apt install cmake libglfw3-dev libgl-dev
+
+# 编译 Build
+git clone <repo-url> && cd InfiniteVoxelCaveWorld
+mkdir build && cd build
+cmake .. && cmake --build .
+
+# 运行 Run
+./InfiniteVoxelCaveWorld
+```
 
 ## Screenshot 示例截图
 

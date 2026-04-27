@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <thread> 
-#include <atomic> //Ô­×Ó²Ù×÷
+#include <atomic> //åŸå­æ“ä½œ
 
 #include "Shader.h"
 #include "stb_image.h"
@@ -18,9 +18,9 @@
 #include "ChunkManager.h"
 #include "Frustum.h"
 
-#include "ImGui/imgui.h"
-#include "ImGui/imgui_impl_glfw.h"
-#include "ImGui/imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 
 std::atomic<bool> updateChunks(true);
@@ -28,103 +28,103 @@ std::atomic<bool> updateChunks(true);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);//Êó±ê»Øµ÷º¯Êı
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);//¹öÂÖ»Øµ÷º¯Êı
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);//é¼ æ ‡å›è°ƒå‡½æ•°
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);//æ»šè½®å›è°ƒå‡½æ•°
 
 unsigned int SCR_WIDTH = 1180;
 unsigned int SCR_HEIGHT = 600;
 
 const unsigned int ImGui_Width = 280;
 
-glm::vec3 originLocation = glm::vec3(8.0f, 58.0f, 8.0f); // Ô­µãÎ»ÖÃ: ÔÚÔ­Ê¼µÄ9x9Çø¿éÖĞĞÄÉÏ·½
-//glm::vec3 originLocation = glm::vec3(50.0f, 58.0f, 74.0f); // Ô­µãÎ»ÖÃ: Ô¶¾àÀë¹Û²ìÕû¸ö³õÊ¼9x9Çø¿é
-//glm::vec3 originLocation = glm::vec3(0.0f, 58.0f, 0.0f); // Ô­µãÎ»ÖÃ: ½ü¾àÀë¹Û²ì¶´Ñ¨½á¹¹
+glm::vec3 originLocation = glm::vec3(8.0f, 58.0f, 8.0f); // åŸç‚¹ä½ç½®: åœ¨åŸå§‹çš„9x9åŒºå—ä¸­å¿ƒä¸Šæ–¹
+//glm::vec3 originLocation = glm::vec3(50.0f, 58.0f, 74.0f); // åŸç‚¹ä½ç½®: è¿œè·ç¦»è§‚å¯Ÿæ•´ä¸ªåˆå§‹9x9åŒºå—
+//glm::vec3 originLocation = glm::vec3(0.0f, 58.0f, 0.0f); // åŸç‚¹ä½ç½®: è¿‘è·ç¦»è§‚å¯Ÿæ´ç©´ç»“æ„
 
 // camera
-Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
-//Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
-//Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ, ÊÀ½çÉÏ·½Ïò, Yaw½Ç, Pitch½Ç
+Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//åˆ›å»ºæ‘„åƒæœºå¯¹è±¡, å‚æ•°åˆ†åˆ«ä¸ºæ‘„åƒæœºçš„ä½ç½®, ä¸–ç•Œä¸Šæ–¹å‘, Yawè§’, Pitchè§’
+//Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//åˆ›å»ºæ‘„åƒæœºå¯¹è±¡, å‚æ•°åˆ†åˆ«ä¸ºæ‘„åƒæœºçš„ä½ç½®, ä¸–ç•Œä¸Šæ–¹å‘, Yawè§’, Pitchè§’
+//Camera camera(originLocation, glm::vec3(0.0f, 1.0f, 0.0f), -135, -27);//åˆ›å»ºæ‘„åƒæœºå¯¹è±¡, å‚æ•°åˆ†åˆ«ä¸ºæ‘„åƒæœºçš„ä½ç½®, ä¸–ç•Œä¸Šæ–¹å‘, Yawè§’, Pitchè§’
 
-//Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));//´´½¨ÉãÏñ»ú¶ÔÏó, ²ÎÊı·Ö±ğÎªÉãÏñ»úµÄÎ»ÖÃ
+//Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));//åˆ›å»ºæ‘„åƒæœºå¯¹è±¡, å‚æ•°åˆ†åˆ«ä¸ºæ‘„åƒæœºçš„ä½ç½®
 
-float lastX = SCR_WIDTH / 2.0f;//Êó±ê³õÊ¼Î»ÖÃ
-float lastY = SCR_HEIGHT / 2.0f;//Êó±ê³õÊ¼Î»ÖÃ
-bool firstMouse = true;//µÚÒ»´ÎÊó±êÒÆ¶¯
+float lastX = SCR_WIDTH / 2.0f;//é¼ æ ‡åˆå§‹ä½ç½®
+float lastY = SCR_HEIGHT / 2.0f;//é¼ æ ‡åˆå§‹ä½ç½®
+bool firstMouse = true;//ç¬¬ä¸€æ¬¡é¼ æ ‡ç§»åŠ¨
 
 // timing
-float deltaTime = 0.0f;	// µ±Ç°Ö¡ÓëÉÏÒ»Ö¡µÄÊ±¼ä²î
-float lastFrame = 0.0f;// ÉÏÒ»Ö¡µÄÊ±¼ä
+float deltaTime = 0.0f;	// å½“å‰å¸§ä¸ä¸Šä¸€å¸§çš„æ—¶é—´å·®
+float lastFrame = 0.0f;// ä¸Šä¸€å¸§çš„æ—¶é—´
 
-// È«¾Ö±äÁ¿ÓÃÓÚ¼ÇÂ¼µ±Ç°µÄ»æÍ¼Ä£Ê½
+// å…¨å±€å˜é‡ç”¨äºè®°å½•å½“å‰çš„ç»˜å›¾æ¨¡å¼
 bool isWireframe = false;
 bool mouseRightPressed = true;
 bool cameraControlEnabled = false;
 
-unsigned int chunkSize = 16;//Çø¿é´óĞ¡
-int viewDistance = 2;//ÊÓÒ°Çø¿é¾àÀë
+unsigned int chunkSize = 16;//åŒºå—å¤§å°
+int viewDistance = 2;//è§†é‡åŒºå—è·ç¦»
 
 static void updateChunksThread(ChunkManager& chunkManager, std::atomic<bool>& running) {
-	// ¸üĞÂÇø¿é¹ÜÀíÆ÷
+	// æ›´æ–°åŒºå—ç®¡ç†å™¨
 	// Update the chunk manager
 	while (running)
 	{
-		chunkManager.update(camera.Position); // ¸üĞÂÇø¿é¹ÜÀíÆ÷
-		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Ìí¼ÓÒ»¸öĞ¡µÄÑÓ³ÙÒÔ±ÜÃâÕ¼ÓÃ¹ı¶àµÄCPU
+		chunkManager.update(camera.Position); // æ›´æ–°åŒºå—ç®¡ç†å™¨
+		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // æ·»åŠ ä¸€ä¸ªå°çš„å»¶è¿Ÿä»¥é¿å…å ç”¨è¿‡å¤šçš„CPU
 	}
 }
 
 int main()
 {
-	glfwInit();//³õÊ¼»¯GLFW
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);//ÉèÖÃÖ÷°æ±¾ºÅ
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//ÉèÖÃ´Î°æ±¾ºÅ
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//ÉèÖÃOpenGLÅäÖÃÎÄ¼ş
+	glfwInit();//åˆå§‹åŒ–GLFW
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);//è®¾ç½®ä¸»ç‰ˆæœ¬å·
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//è®¾ç½®æ¬¡ç‰ˆæœ¬å·
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//è®¾ç½®OpenGLé…ç½®æ–‡ä»¶
 
 #ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);//macOSÏµÍ³ĞèÒªÉèÖÃ
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);//macOSç³»ç»Ÿéœ€è¦è®¾ç½®
 #endif
 
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "InfiniteVoxelWorld", NULL, NULL);//´´½¨´°¿Ú
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "InfiniteVoxelWorld", NULL, NULL);//åˆ›å»ºçª—å£
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
-	glfwMakeContextCurrent(window);//½«´°¿ÚµÄÉÏÏÂÎÄÉèÖÃÎªµ±Ç°Ïß³ÌµÄÖ÷ÉÏÏÂÎÄ
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);//ÉèÖÃ´°¿Ú´óĞ¡¸Ä±äÊ±µÄ»Øµ÷º¯Êı
-	glfwSetCursorPosCallback(window, mouse_callback);//ÉèÖÃÊó±ê»Øµ÷º¯Êı
-	glfwSetScrollCallback(window, scroll_callback);//ÉèÖÃ¹öÂÖ»Øµ÷º¯Êı
+	glfwMakeContextCurrent(window);//å°†çª—å£çš„ä¸Šä¸‹æ–‡è®¾ç½®ä¸ºå½“å‰çº¿ç¨‹çš„ä¸»ä¸Šä¸‹æ–‡
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);//è®¾ç½®çª—å£å¤§å°æ”¹å˜æ—¶çš„å›è°ƒå‡½æ•°
+	glfwSetCursorPosCallback(window, mouse_callback);//è®¾ç½®é¼ æ ‡å›è°ƒå‡½æ•°
+	glfwSetScrollCallback(window, scroll_callback);//è®¾ç½®æ»šè½®å›è°ƒå‡½æ•°
 
 
-	// ¸æËßGLFWÎÒÃÇÏëÒª²¶×½ËùÓĞµÄÊó±êÊäÈë
+	// å‘Šè¯‰GLFWæˆ‘ä»¬æƒ³è¦æ•æ‰æ‰€æœ‰çš„é¼ æ ‡è¾“å…¥
 	// Tell GLFW to capture our mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))//³õÊ¼»¯GLAD
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))//åˆå§‹åŒ–GLAD
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
 
-	// Êä³öOpenGL°æ±¾,ÏÔ¿¨ĞÍºÅµÈĞÅÏ¢
+	// è¾“å‡ºOpenGLç‰ˆæœ¬,æ˜¾å¡å‹å·ç­‰ä¿¡æ¯
 	// Output OpenGL version, graphics card model and other information
-	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;//Êä³öOpenGL°æ±¾
-	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;//Êä³öÏÔ¿¨ĞÍºÅ
-	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;//Êä³öÏÔ¿¨³§ÉÌ	
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;//è¾“å‡ºOpenGLç‰ˆæœ¬
+	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;//è¾“å‡ºæ˜¾å¡å‹å·
+	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;//è¾“å‡ºæ˜¾å¡å‚å•†	
 
-	// ¿ªÆôÉî¶È²âÊÔ
+	// å¼€å¯æ·±åº¦æµ‹è¯•
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	// ¿ªÆôÃæÌŞ³ı
+	// å¼€å¯é¢å‰”é™¤
 	// Enable face culling
 	glEnable(GL_CULL_FACE);
 
-	Shader ourShader("shaders/VertexShader.vert", "shaders/FragmentShader.frag");//´´½¨×ÅÉ«Æ÷¶ÔÏó
-	ourShader.use();//Ê¹ÓÃ×ÅÉ«Æ÷³ÌĞò
+	Shader ourShader("shaders/VertexShader.vert", "shaders/FragmentShader.frag");//åˆ›å»ºç€è‰²å™¨å¯¹è±¡
+	ourShader.use();//ä½¿ç”¨ç€è‰²å™¨ç¨‹åº
 
-	// ³õÊ¼»¯ImGui
+	// åˆå§‹åŒ–ImGui
 	// Setup Dear ImGui context
 	std::cout << "Initializing ImGui" << std::endl;
 
@@ -132,123 +132,123 @@ int main()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 
-	// ÉèÖÃÆ½Ì¨/äÖÈ¾Æ÷°ó¶¨
+	// è®¾ç½®å¹³å°/æ¸²æŸ“å™¨ç»‘å®š
 	// Setup Platform/Renderer bindings
-	ImGui_ImplGlfw_InitForOpenGL(window, true);          // µÚ¶ş¸ö²ÎÊıÊÇÊÇ·ñ²¶×½Êó±ê, ÕâÀïµÄYOUR_WINDOWÊÇÄãµÄGLFW´°¿Ú,Ó¦¸Ã¸Ä³ÉÄãµÄ´°¿Ú±äÁ¿Ãû
+	ImGui_ImplGlfw_InitForOpenGL(window, true);          // ç¬¬äºŒä¸ªå‚æ•°æ˜¯æ˜¯å¦æ•æ‰é¼ æ ‡, è¿™é‡Œçš„YOUR_WINDOWæ˜¯ä½ çš„GLFWçª—å£,åº”è¯¥æ”¹æˆä½ çš„çª—å£å˜é‡å
 	ImGui_ImplOpenGL3_Init();
 
-	// ---- ¼ÓÔØºÍ´´½¨ÎÆÀí - START ---- //
+	// ---- åŠ è½½å’Œåˆ›å»ºçº¹ç† - START ---- //
 	// ---- Load and create a texture - START ---- //
 	{
 		std::cout << "Loading Texture" << std::endl; 
 		
-		unsigned int texture;//ÎÆÀíID
-		glGenTextures(1, &texture);//Éú³ÉÎÆÀí¶ÔÏó
-		// Õâ¶Î¿ÉÒÔĞ´ÔÚÑ­»·ÍâÃæ, ÒòÎªÎÒÃÇäÖÈ¾Ê±²»»á¸Ä±äÎÆÀí, ËùÒÔÕâ¶Î´úÂëÖ»ĞèÒªÔÚäÖÈ¾Ñ­»·ÍâÖ´ĞĞÒ»´Î¼´¿É(¶à¸öÎÆÀíÒ²ÊÇÒ»Ñù, ³ı·ÇÎÒÃÇĞèÒªÔÚäÖÈ¾Ê±¸Ä±äÎÆÀí, ÕâÊ±¾ÍĞèÒªÔÚäÖÈ¾Ñ­»·ÄÚÖ´ĞĞ)
-		glActiveTexture(GL_TEXTURE0);//¼¤»îÎÆÀíµ¥Ôª, Ä¬ÈÏ¼¤»îµÄÊÇGL_TEXTURE0, ËùÒÔÕâĞĞ´úÂëÆäÊµ¿ÉÒÔÊ¡ÂÔ
-		glBindTexture(GL_TEXTURE_2D, texture);//°ó¶¨ÎÆÀí¶ÔÏó
-		// ÉèÖÃÎÆÀí»·ÈÆ·½Ê½
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//ÉèÖÃSÖáµÄ»·ÈÆ·½Ê½ÎªGL_REPEAT
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//ÉèÖÃTÖáµÄ»·ÈÆ·½Ê½ÎªGL_REPEAT
-		// ÉèÖÃÎÆÀí¹ıÂË·½Ê½
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//ÉèÖÃËõĞ¡¹ıÂË·½Ê½ÎªGL_LINEAR
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//ÉèÖÃ·Å´ó¹ıÂË·½Ê½ÎªGL_LINEAR
+		unsigned int texture;//çº¹ç†ID
+		glGenTextures(1, &texture);//ç”Ÿæˆçº¹ç†å¯¹è±¡
+		// è¿™æ®µå¯ä»¥å†™åœ¨å¾ªç¯å¤–é¢, å› ä¸ºæˆ‘ä»¬æ¸²æŸ“æ—¶ä¸ä¼šæ”¹å˜çº¹ç†, æ‰€ä»¥è¿™æ®µä»£ç åªéœ€è¦åœ¨æ¸²æŸ“å¾ªç¯å¤–æ‰§è¡Œä¸€æ¬¡å³å¯(å¤šä¸ªçº¹ç†ä¹Ÿæ˜¯ä¸€æ ·, é™¤éæˆ‘ä»¬éœ€è¦åœ¨æ¸²æŸ“æ—¶æ”¹å˜çº¹ç†, è¿™æ—¶å°±éœ€è¦åœ¨æ¸²æŸ“å¾ªç¯å†…æ‰§è¡Œ)
+		glActiveTexture(GL_TEXTURE0);//æ¿€æ´»çº¹ç†å•å…ƒ, é»˜è®¤æ¿€æ´»çš„æ˜¯GL_TEXTURE0, æ‰€ä»¥è¿™è¡Œä»£ç å…¶å®å¯ä»¥çœç•¥
+		glBindTexture(GL_TEXTURE_2D, texture);//ç»‘å®šçº¹ç†å¯¹è±¡
+		// è®¾ç½®çº¹ç†ç¯ç»•æ–¹å¼
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//è®¾ç½®Sè½´çš„ç¯ç»•æ–¹å¼ä¸ºGL_REPEAT
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//è®¾ç½®Tè½´çš„ç¯ç»•æ–¹å¼ä¸ºGL_REPEAT
+		// è®¾ç½®çº¹ç†è¿‡æ»¤æ–¹å¼
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//è®¾ç½®ç¼©å°è¿‡æ»¤æ–¹å¼ä¸ºGL_LINEAR
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//è®¾ç½®æ”¾å¤§è¿‡æ»¤æ–¹å¼ä¸ºGL_LINEAR
 
-		// ¼ÓÔØÎÆÀíÍ¼Æ¬, ´´½¨ÎÆÀí, Éú³ÉMipmap
-		int width, height, nrChannels;//Í¼Æ¬¿í¶È, ¸ß¶È, ÑÕÉ«Í¨µÀÊı,ÕâÀïµÄwidth, height, nrChannelsÊÇÍ¨¹ıstbi_loadº¯Êı·µ»ØµÄ
-		stbi_set_flip_vertically_on_load(true);//·­×ªÍ¼Æ¬yÖá, ÒòÎªOpenGLµÄ×ø±êÔ­µãÔÚ´°¿Ú×óÏÂ½Ç, ¶øÍ¼Æ¬µÄ×ø±êÔ­µãÔÚ×óÉÏ½Ç
-		//unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);//¼ÓÔØÏä×ÓÎÆÀíÍ¼Æ¬
-		unsigned char* data = stbi_load("stone_16.png", &width, &height, &nrChannels, 0);//¼ÓÔØminecraftÊ¯Í·ÎÆÀíÍ¼Æ¬
+		// åŠ è½½çº¹ç†å›¾ç‰‡, åˆ›å»ºçº¹ç†, ç”ŸæˆMipmap
+		int width, height, nrChannels;//å›¾ç‰‡å®½åº¦, é«˜åº¦, é¢œè‰²é€šé“æ•°,è¿™é‡Œçš„width, height, nrChannelsæ˜¯é€šè¿‡stbi_loadå‡½æ•°è¿”å›çš„
+		stbi_set_flip_vertically_on_load(true);//ç¿»è½¬å›¾ç‰‡yè½´, å› ä¸ºOpenGLçš„åæ ‡åŸç‚¹åœ¨çª—å£å·¦ä¸‹è§’, è€Œå›¾ç‰‡çš„åæ ‡åŸç‚¹åœ¨å·¦ä¸Šè§’
+		//unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);//åŠ è½½ç®±å­çº¹ç†å›¾ç‰‡
+		unsigned char* data = stbi_load("stone_16.png", &width, &height, &nrChannels, 0);//åŠ è½½minecraftçŸ³å¤´çº¹ç†å›¾ç‰‡
 		if (data)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);//Éú³ÉÎÆÀí, ²ÎÊı·Ö±ğÎªÎÆÀíÄ¿±ê, mipmap¼¶±ğ, ÎÆÀí´æ´¢¸ñÊ½, ¿í, ¸ß, 0, Ô´Í¼¸ñÊ½, Ô´Í¼Êı¾İÀàĞÍ, Í¼ÏñÊı¾İ
-			//glGenerateMipmap(GL_TEXTURE_2D);//Éú³ÉMipmap
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);//ç”Ÿæˆçº¹ç†, å‚æ•°åˆ†åˆ«ä¸ºçº¹ç†ç›®æ ‡, mipmapçº§åˆ«, çº¹ç†å­˜å‚¨æ ¼å¼, å®½, é«˜, 0, æºå›¾æ ¼å¼, æºå›¾æ•°æ®ç±»å‹, å›¾åƒæ•°æ®
+			//glGenerateMipmap(GL_TEXTURE_2D);//ç”ŸæˆMipmap
 		}
 		else
 		{
 			std::cout << "Failed to load texture" << std::endl;
 		}
-		stbi_image_free(data);//ÊÍ·ÅÍ¼ÏñÄÚ´æ
+		stbi_image_free(data);//é‡Šæ”¾å›¾åƒå†…å­˜
 
 
-		ourShader.setInt("ourTexture", 0);//ÉèÖÃÎÆÀíµ¥Ôª, ÕâÀïµÄourTexture¶ÔÓ¦µÄÊÇ×ÅÉ«Æ÷ÀïÉùÃ÷µÄuniform sampler2D ourTexture, 0±íÊ¾Ê¹ÓÃÎÆÀíµ¥ÔªGL_TEXTURE0, µ±Ö»ÓĞÒ»¸öÎÆÀíµ¥ÔªÊ±, ÒıºÅÄÚµÄourTexture²»»áÓ°Ïì½á¹û, µ«ÊÇÈç¹ûÓĞ¶à¸öÎÆÀíµ¥ÔªÊ±, Õâ¸öÃû×Ö¾ÍºÜÖØÒªÁË
-		//glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);//ºÍÉÏÃæÒ»ĞĞ´úÂë¹¦ÄÜÒ»Ñù, ÉèÖÃÎÆÀíµ¥Ôª, ÉÏÃæÒ»ĞĞ´úÂëÊÇÍ¨¹ı×ÅÉ«Æ÷ÀàµÄº¯ÊıÉèÖÃ, ÕâĞĞ´úÂëÊÇÖ±½ÓÍ¨¹ıglUniform1iº¯ÊıÉèÖÃ, ÕâÀï×¢ÊÍµô, ½ö¹©²Î¿¼
+		ourShader.setInt("ourTexture", 0);//è®¾ç½®çº¹ç†å•å…ƒ, è¿™é‡Œçš„ourTextureå¯¹åº”çš„æ˜¯ç€è‰²å™¨é‡Œå£°æ˜çš„uniform sampler2D ourTexture, 0è¡¨ç¤ºä½¿ç”¨çº¹ç†å•å…ƒGL_TEXTURE0, å½“åªæœ‰ä¸€ä¸ªçº¹ç†å•å…ƒæ—¶, å¼•å·å†…çš„ourTextureä¸ä¼šå½±å“ç»“æœ, ä½†æ˜¯å¦‚æœæœ‰å¤šä¸ªçº¹ç†å•å…ƒæ—¶, è¿™ä¸ªåå­—å°±å¾ˆé‡è¦äº†
+		//glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);//å’Œä¸Šé¢ä¸€è¡Œä»£ç åŠŸèƒ½ä¸€æ ·, è®¾ç½®çº¹ç†å•å…ƒ, ä¸Šé¢ä¸€è¡Œä»£ç æ˜¯é€šè¿‡ç€è‰²å™¨ç±»çš„å‡½æ•°è®¾ç½®, è¿™è¡Œä»£ç æ˜¯ç›´æ¥é€šè¿‡glUniform1iå‡½æ•°è®¾ç½®, è¿™é‡Œæ³¨é‡Šæ‰, ä»…ä¾›å‚è€ƒ
 	}
-	// ---- ¼ÓÔØºÍ´´½¨ÎÆÀí - END ---- //
+	// ---- åŠ è½½å’Œåˆ›å»ºçº¹ç† - END ---- //
 	// ---- Load and create a texture - END ---- //
 
 
-	// ÉèÖÃ¹âÕÕ·½Ïò
+	// è®¾ç½®å…‰ç…§æ–¹å‘
 	// Set light direction
 	{
 		std::cout << "Setting Light Direction" << std::endl;
 
 		glm::vec3 lightDirection = glm::vec3(0.35f, 0.6f, 0.10f);
 		lightDirection = glm::normalize(lightDirection);
-		ourShader.setVec3("lightDir", lightDirection);//ÉèÖÃ¹âÕÕ·½Ïò
+		ourShader.setVec3("lightDir", lightDirection);//è®¾ç½®å…‰ç…§æ–¹å‘
 	}
 
-	ChunkManager chunkManager(chunkSize);//´´½¨Çø¿é¹ÜÀíÆ÷¶ÔÏó	
+	ChunkManager chunkManager(chunkSize);//åˆ›å»ºåŒºå—ç®¡ç†å™¨å¯¹è±¡	
 
-	std::thread chunkUpdateThread(updateChunksThread, std::ref(chunkManager), std::ref(updateChunks));//´´½¨Ò»¸öÏß³Ì, ÓÃÓÚ¸üĞÂÇø¿é¹ÜÀíÆ÷
+	std::thread chunkUpdateThread(updateChunksThread, std::ref(chunkManager), std::ref(updateChunks));//åˆ›å»ºä¸€ä¸ªçº¿ç¨‹, ç”¨äºæ›´æ–°åŒºå—ç®¡ç†å™¨
 	
-	glViewport(ImGui_Width, 0, SCR_WIDTH - ImGui_Width, SCR_HEIGHT); // ÓÒ°ë²¿·Ö
+	glViewport(ImGui_Width, 0, SCR_WIDTH - ImGui_Width, SCR_HEIGHT); // å³åŠéƒ¨åˆ†
 
-	while (!glfwWindowShouldClose(window))//Ñ­»·äÖÈ¾
+	while (!glfwWindowShouldClose(window))//å¾ªç¯æ¸²æŸ“
 	{
-		float currentFrame = static_cast<float>(glfwGetTime());//»ñÈ¡µ±Ç°Ê±¼ä
-		deltaTime = currentFrame - lastFrame;//¼ÆËãÊ±¼ä²î
-		lastFrame = currentFrame;//¸üĞÂÉÏÒ»Ö¡Ê±¼ä
+		float currentFrame = static_cast<float>(glfwGetTime());//è·å–å½“å‰æ—¶é—´
+		deltaTime = currentFrame - lastFrame;//è®¡ç®—æ—¶é—´å·®
+		lastFrame = currentFrame;//æ›´æ–°ä¸Šä¸€å¸§æ—¶é—´
 
 		// input
 		processInput(window);
 
-		// ¿ªÊ¼ImGuiÖ¡
+		// å¼€å§‹ImGuiå¸§
 		// Start the ImGui frame
 		{
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			// ¸ù¾İĞèÒªÆôÓÃ»ò½ûÓÃDear ImGui¶ÔÊó±êµÄ°ó¶¨
+			// æ ¹æ®éœ€è¦å¯ç”¨æˆ–ç¦ç”¨Dear ImGuiå¯¹é¼ æ ‡çš„ç»‘å®š
 			// Enable or disable Dear ImGui binding to the mouse as needed
 			if (cameraControlEnabled) {
-				io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // ÉèÖÃ±êÖ¾£¬½ûÓÃÊó±ê
+				io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // è®¾ç½®æ ‡å¿—ï¼Œç¦ç”¨é¼ æ ‡
 			}
 			else {
-				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // Çå³ı±êÖ¾£¬ÆôÓÃÊó±ê
+				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // æ¸…é™¤æ ‡å¿—ï¼Œå¯ç”¨é¼ æ ‡
 			}
 
-			ImGui::SetNextWindowPos(ImVec2(0, 0));// ÉèÖÃ´°¿ÚÎ»ÖÃ
-			ImGui::SetNextWindowSize(ImVec2(float(ImGui_Width), float(SCR_HEIGHT))); // ÉèÖÃ´°¿Ú´óĞ¡
-			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);// ´´½¨´°¿Ú²¢ÏÔÊ¾ĞÅÏ¢
+			ImGui::SetNextWindowPos(ImVec2(0, 0));// è®¾ç½®çª—å£ä½ç½®
+			ImGui::SetNextWindowSize(ImVec2(float(ImGui_Width), float(SCR_HEIGHT))); // è®¾ç½®çª—å£å¤§å°
+			ImGui::Begin("InfiniteVoxelWorld", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);// åˆ›å»ºçª—å£å¹¶æ˜¾ç¤ºä¿¡æ¯
 
 			{
-				ImGui::Text("%.1f FPS", io.Framerate);//ÏÔÊ¾Ö¡ÂÊ
-				ImGui::Text("Delta time %.3fms / frame", io.DeltaTime * 1000.0f);//ÏÔÊ¾Ã¿Ö¡Ê±¼ä
+				ImGui::Text("%.1f FPS", io.Framerate);//æ˜¾ç¤ºå¸§ç‡
+				ImGui::Text("Delta time %.3fms / frame", io.DeltaTime * 1000.0f);//æ˜¾ç¤ºæ¯å¸§æ—¶é—´
 				ImGui::Spacing();
-				ImGui::Separator(); // Ìí¼Ó·Ö¸ôÏß
-				ImGui::Spacing();
-			}
-
-			{
-				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//ÏÔÊ¾Ïà»úÎ»ÖÃ		
-				ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//ÏÔÊ¾Ïà»úËùÔÚÇø¿éÎ»ÖÃ
-				ImGui::Text("Chunk Size: %d x 64 x %d", chunkSize, chunkSize);//ÏÔÊ¾Çø¿é´óĞ¡
-				ImGui::Spacing();
-				ImGui::Separator(); // Ìí¼Ó·Ö¸ôÏß
+				ImGui::Separator(); // æ·»åŠ åˆ†éš”çº¿
 				ImGui::Spacing();
 			}
 
 			{
-				// ĞŞ¸ÄÊÓÒ°Çø¿é¾àÀë
+				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.Position.x, camera.Position.y, camera.Position.z);//æ˜¾ç¤ºç›¸æœºä½ç½®		
+				ImGui::Text("Camera Chunk Position: (%.0f, %.0f)", floor(camera.Position.x / chunkSize), floor(camera.Position.z / chunkSize));//æ˜¾ç¤ºç›¸æœºæ‰€åœ¨åŒºå—ä½ç½®
+				ImGui::Text("Chunk Size: %d x 64 x %d", chunkSize, chunkSize);//æ˜¾ç¤ºåŒºå—å¤§å°
+				ImGui::Spacing();
+				ImGui::Separator(); // æ·»åŠ åˆ†éš”çº¿
+				ImGui::Spacing();
+			}
+
+			{
+				// ä¿®æ”¹è§†é‡åŒºå—è·ç¦»
 				// Modify the view distance
-				ImGui::SliderInt("##View Distance", &viewDistance, 1, 3);//»¬¶¯Ìõ, ÓÃÓÚĞŞ¸ÄÊÓÒ°Çø¿é¾àÀë
+				ImGui::SliderInt("##View Distance", &viewDistance, 1, 3);//æ»‘åŠ¨æ¡, ç”¨äºä¿®æ”¹è§†é‡åŒºå—è·ç¦»
 				ImGui::Spacing();
-				ImGui::Text("View Distance: %d", viewDistance);//ÏÔÊ¾ÊÓÒ°Çø¿é¾àÀë
-				ImGui::Text("Chunk Count: ", chunkManager.getChunks().size());//ÏÔÊ¾¿É¼ûÇø¿éÊıÁ¿
+				ImGui::Text("View Distance: %d", viewDistance);//æ˜¾ç¤ºè§†é‡åŒºå—è·ç¦»
+				ImGui::Text("Chunk Count: %zu", chunkManager.getChunks().size());//æ˜¾ç¤ºå¯è§åŒºå—æ•°é‡
 				ImGui::Spacing();
-				if (ImGui::Button("Apply View Distance"))//°´Å¥, ÓÃÓÚÓ¦ÓÃÊÓÒ°Çø¿é¾àÀë
+				if (ImGui::Button("Apply View Distance"))//æŒ‰é’®, ç”¨äºåº”ç”¨è§†é‡åŒºå—è·ç¦»
 				{
 					chunkManager.stopLoading();
 					chunkManager.clearChunks();
@@ -256,7 +256,7 @@ int main()
 					chunkManager.startLoading();
 				}
 				ImGui::Spacing();
-				ImGui::Separator(); // Ìí¼Ó·Ö¸ôÏß
+				ImGui::Separator(); // æ·»åŠ åˆ†éš”çº¿
 				ImGui::Spacing();
 			}
 
@@ -264,30 +264,30 @@ int main()
 				static float weight1 = 1.0f;
 				float weight2 = 1.0f - weight1;
 
-				// ĞŞ¸ÄÔëÉùÈ¨ÖØ
+				// ä¿®æ”¹å™ªå£°æƒé‡
 				// Modify noise weights
-				ImGui::SliderFloat("##Noise Weight", &weight1, 0.0f, 1.0f); // Ê¹ÓÃ##È¥µô»¬¶¯Ìõ±êÇ©
+				ImGui::SliderFloat("##Noise Weight", &weight1, 0.0f, 1.0f); // ä½¿ç”¨##å»æ‰æ»‘åŠ¨æ¡æ ‡ç­¾
 				ImGui::Spacing();
-				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // ÏÔÊ¾ÊÖ¶¯ÉèÖÃµÄ weight1
-				ImGui::Text("OpenSimplex2S Weight: %.2f", weight2); // ÏÔÊ¾×Ô¶¯¼ÆËãµÄ weight2
+				ImGui::Text("OpenSimplex2 Weight: %.2f", weight1); // æ˜¾ç¤ºæ‰‹åŠ¨è®¾ç½®çš„ weight1
+				ImGui::Text("OpenSimplex2S Weight: %.2f", weight2); // æ˜¾ç¤ºè‡ªåŠ¨è®¡ç®—çš„ weight2
 				ImGui::Spacing();
-				// Ó¦ÓÃÔëÉùÉèÖÃ
+				// åº”ç”¨å™ªå£°è®¾ç½®
 				// Apply noise settings
 				if (ImGui::Button("Apply Noise Weight")) {
 					chunkManager.stopLoading();
 					chunkManager.clearChunks();
 					chunkManager.setNoiseWeights(weight1, weight2);
-					chunkManager.clearChunksFolder();//ÇåÀíchunksÎÄ¼ş¼Ğ
+					chunkManager.clearChunksFolder();//æ¸…ç†chunksæ–‡ä»¶å¤¹
 					chunkManager.startLoading();
 
 				}
 				ImGui::Spacing();
-				ImGui::Separator(); // Ìí¼Ó·Ö¸ôÏß
+				ImGui::Separator(); // æ·»åŠ åˆ†éš”çº¿
 				ImGui::Spacing();
 			}
 
 			{
-				// ÖØÖÃÏà»úÎ»ÖÃ°´Å¥
+				// é‡ç½®ç›¸æœºä½ç½®æŒ‰é’®
 				// Reset camera position button
 				if (ImGui::Button("Reset Camera")) {
 					chunkManager.clearChunks();
@@ -296,7 +296,7 @@ int main()
 
 				ImGui::Spacing();
 
-				// Í£Ö¹¼ÓÔØ°´Å¥
+				// åœæ­¢åŠ è½½æŒ‰é’®
 				// Stop loading button
 				if (chunkManager.getIsLoading())
 				{
@@ -311,79 +311,79 @@ int main()
 					}
 				}
 				ImGui::Spacing();
-				ImGui::Separator(); // Ìí¼Ó·Ö¸ôÏß
+				ImGui::Separator(); // æ·»åŠ åˆ†éš”çº¿
 				ImGui::Spacing();
 			}
 
 			{
-				ImGui::Text("Mouse Control: %s", cameraControlEnabled ? "Enabled" : "Disabled");//Êó±ê×´Ì¬	
+				ImGui::Text("Mouse Control: %s", cameraControlEnabled ? "Enabled" : "Disabled");//é¼ æ ‡çŠ¶æ€	
 				ImGui::Spacing();
-				ImGui::Separator(); // Ìí¼Ó·Ö¸ôÏß
+				ImGui::Separator(); // æ·»åŠ åˆ†éš”çº¿
 				ImGui::Spacing();
 			}
 
 			{
-				ImGui::Text("Right Mouse Button:Toggle Control");//×¢Ã÷ÓÒ¼üÇĞ»»Ïà»ú¿ØÖÆ
-				ImGui::Text("WASD: Move");//WASD¿ØÖÆÒÆ¶¯
-				ImGui::Text("Q/E: Up/Down");//Q/E¿ØÖÆÉÏÏÂ
-				ImGui::Text("Space: Toggle Wireframe");//¿Õ¸ñ¼üÇĞ»»Ïß¿òÄ£Ê½
-				ImGui::Text("Mouse Scroll: Zoom");//Êó±ê¹öÂÖ¿ØÖÆËõ·Å
-				ImGui::Text("ESC: Close Window");//ESC¹Ø±Õ´°¿Ú
+				ImGui::Text("Right Mouse Button:Toggle Control");//æ³¨æ˜å³é”®åˆ‡æ¢ç›¸æœºæ§åˆ¶
+				ImGui::Text("WASD: Move");//WASDæ§åˆ¶ç§»åŠ¨
+				ImGui::Text("Q/E: Up/Down");//Q/Eæ§åˆ¶ä¸Šä¸‹
+				ImGui::Text("Space: Toggle Wireframe");//ç©ºæ ¼é”®åˆ‡æ¢çº¿æ¡†æ¨¡å¼
+				ImGui::Text("Mouse Scroll: Zoom");//é¼ æ ‡æ»šè½®æ§åˆ¶ç¼©æ”¾
+				ImGui::Text("ESC: Close Window");//ESCå…³é—­çª—å£
 				ImGui::Spacing();
-				ImGui::Separator(); // Ìí¼Ó·Ö¸ôÏß
+				ImGui::Separator(); // æ·»åŠ åˆ†éš”çº¿
 				ImGui::Spacing();
 			}
 
-			// ´òÓ¡µ±Ç°imgui´°¿ÚµÄ´óĞ¡
+			// æ‰“å°å½“å‰imguiçª—å£çš„å¤§å°
 			//ImVec2 windowSize = ImGui::GetWindowSize();
 			//ImGui::Text("Window Size: (%.0f, %.0f)", windowSize.x, windowSize.y);
 
 			ImGui::End();
 		}
 		
-		// ¸üĞÂÏà»úÎ»ÖÃ
+		// æ›´æ–°ç›¸æœºä½ç½®
 		// Update camera position
 		glm::vec3 cameraPosition = camera.Position;
 		
 		// render
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //ÉèÖÃÇå¿ÕÆÁÄ»ËùÓÃµÄÑÕÉ«ÎªÉîÀ¶É«
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);//Çå¿ÕÑÕÉ«»º³å
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //è®¾ç½®æ¸…ç©ºå±å¹•æ‰€ç”¨çš„é¢œè‰²ä¸ºæ·±è“è‰²
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);//æ¸…ç©ºé¢œè‰²ç¼“å†²
 
-		ourShader.use();//Ê¹ÓÃ×ÅÉ«Æ÷³ÌĞò
+		ourShader.use();//ä½¿ç”¨ç€è‰²å™¨ç¨‹åº
 
-		ourShader.setVec3("viewPos", cameraPosition); // ½«Ïà»úÎ»ÖÃ´«µİ¸ø×ÅÉ«Æ÷
+		ourShader.setVec3("viewPos", cameraPosition); // å°†ç›¸æœºä½ç½®ä¼ é€’ç»™ç€è‰²å™¨
 
-		// Ïà»ú/¹Û²ì¾ØÕó
+		// ç›¸æœº/è§‚å¯ŸçŸ©é˜µ
 		// Camera/View transformation
-		glm::mat4 view = camera.GetViewMatrix();//»ñÈ¡¹Û²ì¾ØÕó
-		ourShader.setMat4("view", view);//ÉèÖÃ¹Û²ì¾ØÕó
-		// ´«µİÍ¶Ó°¾ØÕó¸ø×ÅÉ«Æ÷
+		glm::mat4 view = camera.GetViewMatrix();//è·å–è§‚å¯ŸçŸ©é˜µ
+		ourShader.setMat4("view", view);//è®¾ç½®è§‚å¯ŸçŸ©é˜µ
+		// ä¼ é€’æŠ•å½±çŸ©é˜µç»™ç€è‰²å™¨
 		// Projection matrix
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)(SCR_WIDTH - ImGui_Width)/ (float)SCR_HEIGHT, 0.1f, 100.0f);//Í¸ÊÓÍ¶Ó°
-		ourShader.setMat4("projection", projection);//ÉèÖÃÍ¶Ó°¾ØÕó
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)(SCR_WIDTH - ImGui_Width)/ (float)SCR_HEIGHT, 0.1f, 100.0f);//é€è§†æŠ•å½±
+		ourShader.setMat4("projection", projection);//è®¾ç½®æŠ•å½±çŸ©é˜µ
 
-		glm::mat4 projectionViewMatrix = projection * view;//Í¶Ó°¾ØÕó * ¹Û²ì¾ØÕó = Í¶Ó°¹Û²ì¾ØÕó
+		glm::mat4 projectionViewMatrix = projection * view;//æŠ•å½±çŸ©é˜µ * è§‚å¯ŸçŸ©é˜µ = æŠ•å½±è§‚å¯ŸçŸ©é˜µ
 		Frustum frustum{};
 		frustum.calculateFrustum(projectionViewMatrix);
 
-		//glBindVertexArray(VAO);//°ó¶¨VAO¶ÔÏó(Ö»ÓĞÒ»¸öVAO¶ÔÏóÊ±²»ÊÇ±ØĞëµÄ,µ«ÊÇÎÒÃÇ»¹ÊÇ°ó¶¨Ëü,ÒÔÑø³ÉºÃÏ°¹ß)
+		//glBindVertexArray(VAO);//ç»‘å®šVAOå¯¹è±¡(åªæœ‰ä¸€ä¸ªVAOå¯¹è±¡æ—¶ä¸æ˜¯å¿…é¡»çš„,ä½†æ˜¯æˆ‘ä»¬è¿˜æ˜¯ç»‘å®šå®ƒ,ä»¥å…»æˆå¥½ä¹ æƒ¯)
 
-		// äÖÈ¾µ±Ç°¼ÓÔØµÄÇø¿é
+		// æ¸²æŸ“å½“å‰åŠ è½½çš„åŒºå—
 		// Render currently loaded chunks
 		for (const auto& chunkPair : chunkManager.getChunks()) {
-			const Chunk& chunk = chunkPair.second;// ÕâÀïµÄ.second±íÊ¾mapÖĞµÄÖµ, .first±íÊ¾mapÖĞµÄ¼ü
+			const Chunk& chunk = chunkPair.second;// è¿™é‡Œçš„.secondè¡¨ç¤ºmapä¸­çš„å€¼, .firstè¡¨ç¤ºmapä¸­çš„é”®
 			
-			// Í¨¹ı¿É¼ûÇø¿éäÖÈ¾ÌåËØ
+			// é€šè¿‡å¯è§åŒºå—æ¸²æŸ“ä½“ç´ 
 			if (frustum.isAABBInFrustum(chunk.getMinBounds(), chunk.getMaxBounds()))
 			//if (true)
 			{
-				glm::mat4 model = glm::mat4(1.0f); // Ä£ĞÍ¾ØÕó
+				glm::mat4 model = glm::mat4(1.0f); // æ¨¡å‹çŸ©é˜µ
 				model = glm::translate(model, chunk.getChunkPosition());
-				ourShader.setMat4("model", model); // ÉèÖÃÄ£ĞÍ¾ØÕó
+				ourShader.setMat4("model", model); // è®¾ç½®æ¨¡å‹çŸ©é˜µ
 
 				const auto& vertices = chunk.getChunkVisibleFacesVertices();
 
-				unsigned int VAO, VBO;//VAOÊÇ¶¥µãÊı×é¶ÔÏó, VBOÊÇ¶¥µã»º³å¶ÔÏó
+				unsigned int VAO, VBO;//VAOæ˜¯é¡¶ç‚¹æ•°ç»„å¯¹è±¡, VBOæ˜¯é¡¶ç‚¹ç¼“å†²å¯¹è±¡
 				glGenVertexArrays(1, &VAO);
 				glGenBuffers(1, &VBO);
 
@@ -392,71 +392,71 @@ int main()
 				glBindBuffer(GL_ARRAY_BUFFER, VBO);
 				glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
-				// ÉèÖÃ¶¥µãÎ»ÖÃÊôĞÔ
+				// è®¾ç½®é¡¶ç‚¹ä½ç½®å±æ€§
 				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 				glEnableVertexAttribArray(0);
 
-				// ÉèÖÃÎÆÀí×ø±êÊôĞÔ
+				// è®¾ç½®çº¹ç†åæ ‡å±æ€§
 				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
 				glEnableVertexAttribArray(1);
 
-				// »æÖÆ¶¥µãÊı¾İ
+				// ç»˜åˆ¶é¡¶ç‚¹æ•°æ®
 				glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size()));
 
-				// ½â°ó VAO ºÍ VBO
+				// è§£ç»‘ VAO å’Œ VBO
 				glBindVertexArray(0);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-				// É¾³ı VAO ºÍ VBO, ÊÍ·Å×ÊÔ´, ±ÜÃâÄÚ´æĞ¹Â©
+				// åˆ é™¤ VAO å’Œ VBO, é‡Šæ”¾èµ„æº, é¿å…å†…å­˜æ³„æ¼
 				glDeleteVertexArrays(1, &VAO);
 				glDeleteBuffers(1, &VBO);
 			}
 		}
 
-		// äÖÈ¾GUI
+		// æ¸²æŸ“GUI
 		// Render GUI
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		// glfw: ½»»»»º³åÇøºÍÂÖÑ¯IOÊÂ¼ş(¼üÅÌÊäÈë, Êó±êÒÆ¶¯µÈ)
+		// glfw: äº¤æ¢ç¼“å†²åŒºå’Œè½®è¯¢IOäº‹ä»¶(é”®ç›˜è¾“å…¥, é¼ æ ‡ç§»åŠ¨ç­‰)
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	// ÖÕÖ¹¸üĞÂÏß³Ì
+	// ç»ˆæ­¢æ›´æ–°çº¿ç¨‹
 	// Terminate the update thread
 	updateChunks = false;
 	chunkUpdateThread.join();
 
-	// ¿ÉÑ¡: ÊÍ·ÅËùÓĞ×ÊÔ´
+	// å¯é€‰: é‡Šæ”¾æ‰€æœ‰èµ„æº
 	/*glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);*/
 
-	// äÖÈ¾½áÊøºóÇåÀíImGui
+	// æ¸²æŸ“ç»“æŸåæ¸…ç†ImGui
 	// Cleanup ImGui
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-	// ÇåÀíËùÓĞÖ®Ç°·ÖÅäµÄGLFW×ÊÔ´
+	// æ¸…ç†æ‰€æœ‰ä¹‹å‰åˆ†é…çš„GLFWèµ„æº
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	glfwTerminate();
 	return 0;
 }
 
 
-// ´¦ÀíÊäÈë
+// å¤„ç†è¾“å…¥
 // Process input
 void processInput(GLFWwindow* window)
 {
-	//°´ÏÂESC¼ü¹Ø±Õ´°¿Ú
+	//æŒ‰ä¸‹ESCé”®å…³é—­çª—å£
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	// Ç°ºó×óÓÒÒÆ¶¯
+	// å‰åå·¦å³ç§»åŠ¨
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -475,7 +475,7 @@ void processInput(GLFWwindow* window)
 
 	}
 
-	// ÉÏÏÂÒÆ¶¯
+	// ä¸Šä¸‹ç§»åŠ¨
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
 		camera.Position.y -= camera.MovementSpeed * deltaTime * 2;
@@ -485,7 +485,7 @@ void processInput(GLFWwindow* window)
 		camera.Position.y += camera.MovementSpeed * deltaTime * 2;
 	}
 
-	// °´ÏÂÓÒ¼üÇĞ»»Ïà»ú¿ØÖÆ
+	// æŒ‰ä¸‹å³é”®åˆ‡æ¢ç›¸æœºæ§åˆ¶
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 	{
 		if (!mouseRightPressed)
@@ -508,37 +508,37 @@ void processInput(GLFWwindow* window)
 		mouseRightPressed = false;
 	}
 
-	// °´ÏÂ¿Õ¸ñ¼üÇĞ»»»æÍ¼Ä£Ê½
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) // °´ÏÂ¿Õ¸ñ¼ü
+	// æŒ‰ä¸‹ç©ºæ ¼é”®åˆ‡æ¢ç»˜å›¾æ¨¡å¼
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) // æŒ‰ä¸‹ç©ºæ ¼é”®
 	{
 		if (!isWireframe)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // ÇĞ»»µ½Ïß¿òÄ£Ê½
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // åˆ‡æ¢åˆ°çº¿æ¡†æ¨¡å¼
 			isWireframe = true;
 		}
 	}
-	else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) // ËÉ¿ª¿Õ¸ñ¼ü
+	else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) // æ¾å¼€ç©ºæ ¼é”®
 	{
 		if (isWireframe)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // ÇĞ»»»ØÌî³äÄ£Ê½
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // åˆ‡æ¢å›å¡«å……æ¨¡å¼
 			isWireframe = false;
 		}
 	}
 }
 
 
-// µ±´°¿Ú´óĞ¡¸Ä±äÊ±µ÷ÓÃ¸Ãº¯Êı
+// å½“çª—å£å¤§å°æ”¹å˜æ—¶è°ƒç”¨è¯¥å‡½æ•°
 // Callback function when the window size changes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	SCR_HEIGHT = height;
 	SCR_WIDTH = width;
-	glViewport(ImGui_Width , 0, SCR_WIDTH - ImGui_Width, SCR_HEIGHT);//ÉèÖÃÊÓ¿Ú´óĞ¡
+	glViewport(ImGui_Width , 0, SCR_WIDTH - ImGui_Width, SCR_HEIGHT);//è®¾ç½®è§†å£å¤§å°
 }
 
 
-// Êó±ê»Øµ÷º¯Êı: Êó±êÒÆ¶¯Ê±µ÷ÓÃ
+// é¼ æ ‡å›è°ƒå‡½æ•°: é¼ æ ‡ç§»åŠ¨æ—¶è°ƒç”¨
 // Mouse callback function: called when the mouse moves
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
@@ -564,7 +564,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 
-// ¹öÂÖ»Øµ÷º¯Êı: Êó±ê¹öÂÖ¹ö¶¯Ê±µ÷ÓÃ
+// æ»šè½®å›è°ƒå‡½æ•°: é¼ æ ‡æ»šè½®æ»šåŠ¨æ—¶è°ƒç”¨
 // Scroll callback function: called when the mouse wheel is scrolled
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {

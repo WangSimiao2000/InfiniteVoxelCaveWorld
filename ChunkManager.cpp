@@ -1,24 +1,24 @@
 #include "ChunkManager.h"
 
-// ¹¹Ôìº¯Êı£¬³õÊ¼»¯Çø¿é´óĞ¡
+// æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–åŒºå—å¤§å°
 // Constructor, initialize chunk size
 ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
 
     std::cout << "Initializing Origin Chunks" << std::endl;
 
-	// ±£´æ×îºóÒ»Ö¡µÄÉãÏñ»úÎ»ÖÃ
+	// ä¿å­˜æœ€åä¸€å¸§çš„æ‘„åƒæœºä½ç½®
 	// Save the camera position of the last frame
 	lastCameraPosition = glm::vec3(0.0f);
 
-    // Èç¹û²»´æÔÚchunksÎÄ¼ş¼Ğ£¬Ôò´´½¨
+    // å¦‚æœä¸å­˜åœ¨chunksæ–‡ä»¶å¤¹ï¼Œåˆ™åˆ›å»º
 	// Create the chunks folder if it doesn't exist
     if (!std::filesystem::exists("chunks")) {
         std::filesystem::create_directory("chunks");
     }
 
-    // ÅäÖÃÔëÉùÉú³ÉÆ÷
+    // é…ç½®å™ªå£°ç”Ÿæˆå™¨
 	// Configure noise generator
-    // ³õÊ¼»¯ÔëÉùÉú³ÉÆ÷
+    // åˆå§‹åŒ–å™ªå£°ç”Ÿæˆå™¨
 	// Initialize noise generator
     //noise1.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     noise1.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
@@ -32,49 +32,49 @@ ChunkManager::ChunkManager(int chunkSize) : chunkSize(chunkSize) {
     noise2.SetFrequency(0.1f);
     noise2.SetSeed(SEED);
 
-	THRESHOLD = 0.3f; // ãĞÖµ
+	THRESHOLD = 0.3f; // é˜ˆå€¼
 
-    // ÁÙÊ±´æ´¢ĞÂ¼ÓÔØµÄÇø¿é
+    // ä¸´æ—¶å­˜å‚¨æ–°åŠ è½½çš„åŒºå—
 	// Temporary storage for newly loaded chunks
 	std::unordered_map<std::string, Chunk> tempChunks;
 
-    // ±éÀúÉãÏñ»úÖÜÎ§µÄÇø¿é
+    // éå†æ‘„åƒæœºå‘¨å›´çš„åŒºå—
     // Traverse the chunks around the camera
-    // 3¡Á3µÄ·¶Î§£¬¼´8¸öÏàÁÚÇø¿é¼ÓÉÏÉãÏñ»úËùÔÚµÄÇø¿é
-	// A range of 3¡Á3, that is, 8 adjacent chunks plus the chunk where the camera is located
+    // 3Ã—3çš„èŒƒå›´ï¼Œå³8ä¸ªç›¸é‚»åŒºå—åŠ ä¸Šæ‘„åƒæœºæ‰€åœ¨çš„åŒºå—
+	// A range of 3Ã—3, that is, 8 adjacent chunks plus the chunk where the camera is located
     for (int dx = -viewDistance; dx <= viewDistance; ++dx) {
         for (int dz = -viewDistance; dz <= viewDistance; ++dz) {
-            glm::vec3 chunkPos = glm::vec3(dx, 0.0f, dz);// ¼ÆËãÏàÁÚÇø¿éµÄÎ»ÖÃ
+            glm::vec3 chunkPos = glm::vec3(dx, 0.0f, dz);// è®¡ç®—ç›¸é‚»åŒºå—çš„ä½ç½®
             chunkPos.x *= chunkSize;
             //chunkPos.y *= chunkSize;
             chunkPos.z *= chunkSize;
-            std::string key = getChunkKey(chunkPos);// Éú³ÉÇø¿éµÄ¼ü
+            std::string key = getChunkKey(chunkPos);// ç”ŸæˆåŒºå—çš„é”®
 
-            // ÕâÀïµÄ.find()º¯ÊıÊÇÔÚunordered_mapÖĞ²éÕÒ¼üÖµÎªkeyµÄÔªËØ£¬Èç¹ûÕÒµ½ÁË¾Í·µ»ØÖ¸Ïò¸ÃÔªËØµÄµü´úÆ÷£¬·ñÔò·µ»Øunordered_map::end()º¯Êı·µ»ØµÄµü´úÆ÷
+            // è¿™é‡Œçš„.find()å‡½æ•°æ˜¯åœ¨unordered_mapä¸­æŸ¥æ‰¾é”®å€¼ä¸ºkeyçš„å…ƒç´ ï¼Œå¦‚æœæ‰¾åˆ°äº†å°±è¿”å›æŒ‡å‘è¯¥å…ƒç´ çš„è¿­ä»£å™¨ï¼Œå¦åˆ™è¿”å›unordered_map::end()å‡½æ•°è¿”å›çš„è¿­ä»£å™¨
 			// This .find() function is used to find the element with the key value key in the unordered_map. If found, it returns an iterator pointing to the element, otherwise it returns the iterator returned by unordered_map::end()
             if (chunks.find(key) == chunks.end()) {
-                //auto start = std::chrono::high_resolution_clock::now();// ¼ÆÊ±¿ªÊ¼
-                // Èç¹ûÇø¿éÎ´±»¼ÓÔØ£¬Ôòµ÷ÓÃloadChunk¼ÓÔØÇø¿é
+                //auto start = std::chrono::high_resolution_clock::now();// è®¡æ—¶å¼€å§‹
+                // å¦‚æœåŒºå—æœªè¢«åŠ è½½ï¼Œåˆ™è°ƒç”¨loadChunkåŠ è½½åŒºå—
                 loadChunk(chunkPos);
-                //auto end = std::chrono::high_resolution_clock::now(); //¼ÇÂ¼½áÊøÊ±¼ä
+                //auto end = std::chrono::high_resolution_clock::now(); //è®°å½•ç»“æŸæ—¶é—´
                 //std::chrono::duration<double> generationTime = end - start;
                 //std::cout << "Chunk generated " << key << " in " << generationTime.count() << " seconds." << std::endl;
             }
-            //  ÁÙÊ±´æ´¢ĞèÒª±£ÁôµÄÇø¿é
+            //  ä¸´æ—¶å­˜å‚¨éœ€è¦ä¿ç•™çš„åŒºå—
 			// Temporary storage for chunks to be retained
             tempChunks[key] = chunks[key];
         }
     }
 
-    // ¸üĞÂchunks³ÉÔ±±äÁ¿
+    // æ›´æ–°chunksæˆå‘˜å˜é‡
 	// Update the chunks member variable
     chunks = tempChunks;
 }
 
-// ¸ù¾İÇø¿éµÄÎ»ÖÃÉú³ÉÒ»¸öÎ¨Ò»µÄ×Ö·û´®¼ü£¬ÓÃÓÚ±êÊ¶Çø¿é
+// æ ¹æ®åŒºå—çš„ä½ç½®ç”Ÿæˆä¸€ä¸ªå”¯ä¸€çš„å­—ç¬¦ä¸²é”®ï¼Œç”¨äºæ ‡è¯†åŒºå—
 // Generate a unique string key based on the position of the chunk to identify the chunk
-// - ½«Çø¿éµÄ×ø±ê³ıÒÔÇø¿éµÄ´óĞ¡£¬È»ºóÏòÏÂÈ¡Õû£¬È·±£»ñÈ¡µÄÊÇÇø¿éµÄÕûÊı×ø±ê
-// - ½«ÕûÊı×ø±ê×ª»»Îª×Ö·û´®£¬ÓÃÏÂ»®Ïß·Ö¸ô£¬×÷Îª¼ü
+// - å°†åŒºå—çš„åæ ‡é™¤ä»¥åŒºå—çš„å¤§å°ï¼Œç„¶åå‘ä¸‹å–æ•´ï¼Œç¡®ä¿è·å–çš„æ˜¯åŒºå—çš„æ•´æ•°åæ ‡
+// - å°†æ•´æ•°åæ ‡è½¬æ¢ä¸ºå­—ç¬¦ä¸²ï¼Œç”¨ä¸‹åˆ’çº¿åˆ†éš”ï¼Œä½œä¸ºé”®
 std::string ChunkManager::getChunkKey(const glm::vec3& position) {
     int x = static_cast<int>(floor(position.x / chunkSize));
 	//int y = static_cast<int>(floor(position.y / chunkSize));
@@ -111,18 +111,18 @@ std::unordered_map<std::string, Chunk>& ChunkManager::getChunks()
 	return chunks;
 }
 
-// ¸üĞÂµ±Ç°¼ÓÔØµÄÇø¿é
+// æ›´æ–°å½“å‰åŠ è½½çš„åŒºå—
 // Update the currently loaded chunks
 void ChunkManager::update(const glm::vec3& cameraPosition) {
 
     if (!isLoading) {
-        return; // Èç¹ûÍ£Ö¹¼ÓÔØ£¬Ôò²»½øĞĞ¸üĞÂ
+        return; // å¦‚æœåœæ­¢åŠ è½½ï¼Œåˆ™ä¸è¿›è¡Œæ›´æ–°
     }
 
-	std::unordered_map<std::string, Chunk> tempChunks;// ÁÙÊ±´æ´¢ĞÂ¼ÓÔØµÄÇø¿é
+	std::unordered_map<std::string, Chunk> tempChunks;// ä¸´æ—¶å­˜å‚¨æ–°åŠ è½½çš„åŒºå—
 	tempChunks.clear();
 
-	// ¼ÆËãÉãÏñ»úËùÔÚµÄÇø¿éÎ»ÖÃ
+	// è®¡ç®—æ‘„åƒæœºæ‰€åœ¨çš„åŒºå—ä½ç½®
 	// Calculate the position of the chunk where the camera is located
     glm::vec3 cameraChunkPosition = glm::vec3(
         floor(cameraPosition.x / chunkSize),
@@ -130,48 +130,48 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
         floor(cameraPosition.z / chunkSize)
     );
 
-    // Èç¹ûÉãÏñ»úÎ»ÖÃÃ»ÓĞ¸Ä±äÇÒÇø¿éÊıÁ¿Îª0£¬Ôò²»ĞèÒª¸üĞÂÇø¿é
+    // å¦‚æœæ‘„åƒæœºä½ç½®æ²¡æœ‰æ”¹å˜ä¸”åŒºå—æ•°é‡ä¸º0ï¼Œåˆ™ä¸éœ€è¦æ›´æ–°åŒºå—
 	// If the camera position has not changed and the number of chunks is 0, there is no need to update the chunks
 	if (cameraChunkPosition == lastCameraPosition && chunks.size() != 0) {
 		return;
 	}
 
-	// Çå³ıÄÚ´æÖĞµÄÇø¿éÊı¾İ
+	// æ¸…é™¤å†…å­˜ä¸­çš„åŒºå—æ•°æ®
 	//chunks.clear();
     //std::cout << "-------------- Chunk has updated --------------" << std::endl;
 
-    // ´òÓ¡ÉãÏñ»úËùÔÚµÄÇø¿éÎ»ÖÃ
+    // æ‰“å°æ‘„åƒæœºæ‰€åœ¨çš„åŒºå—ä½ç½®
     //std::cout << "Camera chunk position: " << cameraChunkPosition.x << ", " << cameraChunkPosition.y << ", " << cameraChunkPosition.z << std::endl;
-    // ´òÓ¡µ±Ç°ÒÑÓĞµÄÇø¿éÊıÁ¿
+    // æ‰“å°å½“å‰å·²æœ‰çš„åŒºå—æ•°é‡
     // std::cout << "Number of chunks: " << chunks.size() << std::endl;
-    // ¸üĞÂÉÏÒ»Ö¡µÄÉãÏñ»úÎ»ÖÃ
+    // æ›´æ–°ä¸Šä¸€å¸§çš„æ‘„åƒæœºä½ç½®
     lastCameraPosition = cameraChunkPosition;
     
-    // ±éÀúÉãÏñ»úÖÜÎ§µÄÇø¿é
+    // éå†æ‘„åƒæœºå‘¨å›´çš„åŒºå—
     // Traverse the chunks around the camera
-	// 3¡Á3µÄ·¶Î§£¬¼´8¸öÏàÁÚÇø¿é¼ÓÉÏÉãÏñ»úËùÔÚµÄÇø¿é
+	// 3Ã—3çš„èŒƒå›´ï¼Œå³8ä¸ªç›¸é‚»åŒºå—åŠ ä¸Šæ‘„åƒæœºæ‰€åœ¨çš„åŒºå—
     for (int dx = -viewDistance; dx <= viewDistance; ++dx) {
         for (int dz = -viewDistance; dz <= viewDistance; ++dz) {
-            glm::vec3 chunkPos = cameraChunkPosition + glm::vec3(dx, 0.0f, dz);// ¼ÆËãÏàÁÚÇø¿éµÄÎ»ÖÃ
+            glm::vec3 chunkPos = cameraChunkPosition + glm::vec3(dx, 0.0f, dz);// è®¡ç®—ç›¸é‚»åŒºå—çš„ä½ç½®
             chunkPos.x *= chunkSize;
             chunkPos.z *= chunkSize;
-            std::string key = getChunkKey(chunkPos);// Éú³ÉÇø¿éµÄ¼ü
+            std::string key = getChunkKey(chunkPos);// ç”ŸæˆåŒºå—çš„é”®
 
-			//ÕâÀïµÄ.find()º¯ÊıÊÇÔÚunordered_mapÖĞ²éÕÒ¼üÖµÎªkeyµÄÔªËØ£¬Èç¹ûÕÒµ½ÁË¾Í·µ»ØÖ¸Ïò¸ÃÔªËØµÄµü´úÆ÷£¬·ñÔò·µ»Øunordered_map::end()º¯Êı·µ»ØµÄµü´úÆ÷
+			//è¿™é‡Œçš„.find()å‡½æ•°æ˜¯åœ¨unordered_mapä¸­æŸ¥æ‰¾é”®å€¼ä¸ºkeyçš„å…ƒç´ ï¼Œå¦‚æœæ‰¾åˆ°äº†å°±è¿”å›æŒ‡å‘è¯¥å…ƒç´ çš„è¿­ä»£å™¨ï¼Œå¦åˆ™è¿”å›unordered_map::end()å‡½æ•°è¿”å›çš„è¿­ä»£å™¨
             if (chunks.find(key) == chunks.end()) {
-                //auto start = std::chrono::high_resolution_clock::now();// ¼ÆÊ±¿ªÊ¼
-                // Èç¹ûÇø¿éÎ´±»¼ÓÔØ£¬Ôòµ÷ÓÃloadChunk¼ÓÔØÇø¿é
+                //auto start = std::chrono::high_resolution_clock::now();// è®¡æ—¶å¼€å§‹
+                // å¦‚æœåŒºå—æœªè¢«åŠ è½½ï¼Œåˆ™è°ƒç”¨loadChunkåŠ è½½åŒºå—
                 loadChunk(chunkPos);
-                //auto end = std::chrono::high_resolution_clock::now(); //¼ÇÂ¼½áÊøÊ±¼ä
+                //auto end = std::chrono::high_resolution_clock::now(); //è®°å½•ç»“æŸæ—¶é—´
                 //std::chrono::duration<double> generationTime = end - start;
                 //std::cout << "Chunk generated " << key <<" in " << generationTime.count() << " seconds." << std::endl;
             }
-            //  ÁÙÊ±´æ´¢ĞèÒª±£ÁôµÄÇø¿é
+            //  ä¸´æ—¶å­˜å‚¨éœ€è¦ä¿ç•™çš„åŒºå—
             tempChunks[key] = chunks[key];
         }
     }
     
-    // ¸üĞÂchunks³ÉÔ±±äÁ¿
+    // æ›´æ–°chunksæˆå‘˜å˜é‡
     {
         std::lock_guard<std::mutex> lock(chunksMutex);
         chunks = tempChunks;
@@ -181,37 +181,37 @@ void ChunkManager::update(const glm::vec3& cameraPosition) {
 void ChunkManager::clearChunks()
 {
     std::lock_guard<std::mutex> lock(chunksMutex);
-    chunks.clear(); // Çå¿ÕÒÑ¼ÓÔØµÄÇø¿é
+    chunks.clear(); // æ¸…ç©ºå·²åŠ è½½çš„åŒºå—
     //std::cout << "Cleared all loaded chunks." << std::endl;
 }
 
 void ChunkManager::stopLoading()
 {
-    isLoading = false; // Í£Ö¹¼ÓÔØÇø¿é
+    isLoading = false; // åœæ­¢åŠ è½½åŒºå—
     //std::cout << "Stopped loading chunks." << std::endl;
 }
 
 void ChunkManager::startLoading()
 {
-	isLoading = true; // ¿ªÊ¼¼ÓÔØÇø¿é
+	isLoading = true; // å¼€å§‹åŠ è½½åŒºå—
 	//std::cout << "Started loading chunks." << std::endl;
 }
 
-// ¼ÓÔØÇø¿é
+// åŠ è½½åŒºå—
 // Load chunks
 void ChunkManager::loadChunk(const glm::vec3& position) {
-	// ¸ù¾İÇø¿éµÄÎ»ÖÃÉú³ÉÎ¨Ò»µÄ¼ü
+	// æ ¹æ®åŒºå—çš„ä½ç½®ç”Ÿæˆå”¯ä¸€çš„é”®
 	// Generate a unique key based on the position of the chunk
     std::string key = getChunkKey(position);
-	// Éú³ÉÇø¿éÎÄ¼şÃû
+	// ç”ŸæˆåŒºå—æ–‡ä»¶å
 	// Generate chunk file name
     std::string filename = "chunks/" + key + ".chunk";
 
-    Chunk chunk(chunkSize, position); // ´´½¨¿ÕµÄChunk¶ÔÏó
+    Chunk chunk(chunkSize, position); // åˆ›å»ºç©ºçš„Chunkå¯¹è±¡
 
-    std::ifstream inFile(filename, std::ios::binary);// ifstream¶ÔÏóÓÃÓÚ¶ÁÈ¡ÎÄ¼ş, ÒÔ¶ş½øÖÆ¸ñÊ½´ò¿ªÎÄ¼ş
+    std::ifstream inFile(filename, std::ios::binary);// ifstreamå¯¹è±¡ç”¨äºè¯»å–æ–‡ä»¶, ä»¥äºŒè¿›åˆ¶æ ¼å¼æ‰“å¼€æ–‡ä»¶
     if (inFile.is_open()) {
-        // ¶ÁÈ¡Çø¿éÊı¾İ
+        // è¯»å–åŒºå—æ•°æ®
 		// Read chunk data
         glm::vec3 pos;
         while (inFile.read(reinterpret_cast<char*>(&pos), sizeof(glm::vec3))) {
@@ -229,7 +229,7 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
     }
 
 
-    // ½«¼ÓÔØµÄÇø¿é´æ´¢µ½chunksÖĞ
+    // å°†åŠ è½½çš„åŒºå—å­˜å‚¨åˆ°chunksä¸­
 	// Store the loaded chunks in chunks
     {
         std::lock_guard<std::mutex> lock(chunksMutex);
@@ -237,17 +237,17 @@ void ChunkManager::loadChunk(const glm::vec3& position) {
     }
 }
 
-// ½«Çø¿éÊı¾İ±£´æµ½ÎÄ¼ş
+// å°†åŒºå—æ•°æ®ä¿å­˜åˆ°æ–‡ä»¶
 // Save chunk data to file
 void ChunkManager::saveChunkToFile(const Chunk& chunk, const std::string& filename) {
-    // Ê¹ÓÃ¶ş½øÖÆ¸ñÊ½±£´æÇø¿éÖĞµÄÌåËØÎ»ÖÃ
+    // ä½¿ç”¨äºŒè¿›åˆ¶æ ¼å¼ä¿å­˜åŒºå—ä¸­çš„ä½“ç´ ä½ç½®
 	// Save voxel positions in the chunk in binary format
     std::ofstream outFile(filename, std::ios::binary);
     
     if (outFile.is_open()) {
-        // ±£´æÇø¿éÊı¾İ
+        // ä¿å­˜åŒºå—æ•°æ®
 		// Save chunk data
-        // ±éÀúÇø¿éÖĞµÄÃ¿¸öÌåËØÎ»ÖÃ£¬²¢Ğ´ÈëÎÄ¼ş
+        // éå†åŒºå—ä¸­çš„æ¯ä¸ªä½“ç´ ä½ç½®ï¼Œå¹¶å†™å…¥æ–‡ä»¶
 		// Traverse each voxel position in the chunk and write it to the file
         for (const auto& pos : chunk.getVoxelPositions()) {
             outFile.write(reinterpret_cast<const char*>(&pos), sizeof(glm::vec3));

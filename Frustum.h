@@ -7,10 +7,10 @@
 
 class Frustum {
 public:
-    // ¼ÆËãÊÓ×¶ÌåÆ½Ãæ
+    // è®¡ç®—è§†é”¥ä½“å¹³é¢
     // Calculate frustum planes
-    // Æ½ÃæµÄ±íÊ¾: ax + by + cz + d = 0
-    // vec4µÄÇ°Èı¸ö·ÖÁ¿±íÊ¾Æ½ÃæµÄ·¨ÏòÁ¿£¬µÚËÄ¸ö·ÖÁ¿±íÊ¾Æ½ÃæµÄ¾àÀë
+    // å¹³é¢çš„è¡¨ç¤º: ax + by + cz + d = 0
+    // vec4çš„å‰ä¸‰ä¸ªåˆ†é‡è¡¨ç¤ºå¹³é¢çš„æ³•å‘é‡ï¼Œç¬¬å››ä¸ªåˆ†é‡è¡¨ç¤ºå¹³é¢çš„è·ç¦»
     // [a, b, c, d] = [normal, distance]
     void calculateFrustum(const glm::mat4& projectionViewMatrix) {
         planes[0] = glm::vec4(projectionViewMatrix[0][3] + projectionViewMatrix[0][0], // Left
@@ -44,7 +44,7 @@ public:
         }
     }
 
-    // ¼ì²éµãÊÇ·ñÔÚÊÓ×¶ÌåÄÚ
+    // æ£€æŸ¥ç‚¹æ˜¯å¦åœ¨è§†é”¥ä½“å†…
 	// Check if a point is inside the frustum
     bool isPointInFrustum(const glm::vec3& point) const {
         for (int i = 0; i < 6; i++) {
@@ -61,7 +61,7 @@ public:
         return isAABBInFrustum(min, max);
     }
 
-    // ¼ì²éAABBÊÇ·ñÔÚÊÓ×¶ÌåÄÚ, ÕâÀïµÄAABB±íÊ¾Ò»¸öÁ¢·½Ìå£¬ÓÉ×îĞ¡µãºÍ×î´óµãÈ·¶¨
+    // æ£€æŸ¥AABBæ˜¯å¦åœ¨è§†é”¥ä½“å†…, è¿™é‡Œçš„AABBè¡¨ç¤ºä¸€ä¸ªç«‹æ–¹ä½“ï¼Œç”±æœ€å°ç‚¹å’Œæœ€å¤§ç‚¹ç¡®å®š
 	// Check if an AABB is inside the frustum. Here, AABB represents a cube, determined by the minimum and maximum points   
     bool isAABBInFrustum(const glm::vec3& min, const glm::vec3& max) const {
         for (int i = 0; i < 6; i++) {
